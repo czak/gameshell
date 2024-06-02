@@ -14,6 +14,9 @@ protocols = declare_dependency(
 )
 
 wayland = dependency('wayland-client')
+wayland_egl = dependency('wayland-egl')
+egl = dependency('egl')
+glesv2 = dependency('glesv2')
 
 executable(
   'gameshell',
@@ -21,5 +24,8 @@ executable(
   dependencies: [
     protocols,
     wayland,
+    wayland_egl,
+    egl,
+    glesv2,
   ],
 )
