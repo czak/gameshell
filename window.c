@@ -22,6 +22,8 @@ static EGLConfig egl_config;
 static EGLContext egl_context;
 static EGLSurface egl_surface;
 
+static void (*on_draw)();
+
 static const EGLint config_attributes[] = {
 	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 	EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -66,6 +68,11 @@ static void zwlr_layer_surface_v1_configure(void *data,
 
 	wl_egl_window_resize(wl_egl_window, width, height, 0, 0);
 	glViewport(0, 0, width, height);
+
+	if (on_draw)
+		on_draw();
+
+	eglSwapBuffers(egl_display, egl_surface);
 }
 
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {
@@ -73,7 +80,7 @@ static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listene
 	.closed = noop,
 };
 
-void window_init()
+void window_init(void (*_on_draw)())
 {
 	wl_display = wl_display_connect(NULL);
 	wl_registry = wl_display_get_registry(wl_display);
@@ -110,6 +117,8 @@ void window_init()
 	zwlr_layer_surface_v1_add_listener(zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
 	zwlr_layer_surface_v1_set_exclusive_zone(zwlr_layer_surface_v1, -1);
 	wl_surface_commit(wl_surface);
+
+	on_draw = _on_draw;
 }
 
 int window_dispatch()
