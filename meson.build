@@ -9,6 +9,7 @@ endif
 protocols = declare_dependency(
   sources: [
     'protocols/xdg-shell.c',
+    'protocols/wlr-layer-shell-unstable-v1.c',
   ],
   include_directories: ['protocols'],
 )
