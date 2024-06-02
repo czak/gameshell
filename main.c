@@ -73,10 +73,21 @@ static void on_draw()
 
 static void on_key(int key)
 {
-	if (key == 1) {
-		running = 0;
-	} else if (key == 57) {
-		window_redraw();
+	switch (key) {
+		case 1: // Escape
+			running = 0;
+			break;
+
+		case 15: // Tab
+			window_toggle();
+			break;
+
+		case 57: // Space
+			window_redraw();
+			break;
+
+		default:
+			fprintf(stderr, "key: %d\n", key);
 	}
 }
 

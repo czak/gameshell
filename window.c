@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <wayland-client.h>
 #include <wayland-egl.h>
 #include <EGL/egl.h>
@@ -27,6 +28,8 @@ static EGLSurface egl_surface;
 
 static void (*on_draw)();
 static void (*on_key)(int key);
+
+static int visible = 1;
 
 static const EGLint config_attributes[] = {
 	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -92,6 +95,8 @@ static void zwlr_layer_surface_v1_configure(void *data,
 {
 	zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface_v1, serial);
 
+	if (!visible) return;
+
 	wl_egl_window_resize(wl_egl_window, width, height, 0, 0);
 	glViewport(0, 0, width, height);
 
@@ -155,15 +160,26 @@ int window_dispatch()
 	return wl_display_dispatch(wl_display);
 }
 
-void window_swap()
-{
-	eglSwapBuffers(egl_display, egl_surface);
-}
-
 void window_redraw()
 {
 	if (on_draw)
 		on_draw();
 
 	eglSwapBuffers(egl_display, egl_surface);
+}
+
+void window_toggle()
+{
+	visible = 0;
+
+	wl_surface_attach(wl_surface, NULL, 0, 0);
+	wl_surface_commit(wl_surface);
+	window_dispatch();
+
+	sleep(1);
+
+	visible = 1;
+
+	eglSwapBuffers(egl_display, egl_surface);
+	window_dispatch();
 }
