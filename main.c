@@ -14,16 +14,18 @@ static const char *vertex_shader_source =
 "}\n";
 
 static const char *fragment_shader_source =
+"precision mediump float;\n"
+"uniform vec4 uColor;\n"
 "void main()\n"
 "{\n"
-"  gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"  gl_FragColor = uColor;\n"
 "}\n";
 
 static GLuint program;
 static GLushort vertices[] = {
 	10, 10,
-	10, 540,
-	1800, 10,
+	10, 180,
+	120, 10,
 };
 
 static void program_init()
@@ -48,13 +50,23 @@ static void program_init()
 
 static void on_draw()
 {
-	glClearColor(0.3f, 0.0f, 0.0f, 0.3f);
+	static int frame = 0;
+
+	glClearColor(0.2f, 0.0f, 0.0f, 0.3f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(program);
 	glEnableVertexAttribArray(0);
 
+	float r = (float) ((frame * 47) % 256) / 256.0f;
+	float g = (float) ((frame * 63) % 256) / 256.0f;
+	float b = (float) ((frame * 99) % 256) / 256.0f;
+
+	glUniform4f(0, r, g, b, 0.5f);
+
 	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	frame++;
 }
 
 int main(int argc, char *argv[])
