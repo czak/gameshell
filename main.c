@@ -28,6 +28,8 @@ static GLushort vertices[] = {
 	120, 10,
 };
 
+static int running = 1;
+
 static void program_init()
 {
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -69,14 +71,23 @@ static void on_draw()
 	frame++;
 }
 
+static void on_key(int key)
+{
+	if (key == 1) {
+		running = 0;
+	} else if (key == 57) {
+		window_redraw();
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	window_init(on_draw);
+	window_init(on_draw, on_key);
 
 	program_init();
 
 	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, 0, vertices);
 
-	while (window_dispatch() != -1) {
+	while (running && window_dispatch() != -1) {
 	}
 }

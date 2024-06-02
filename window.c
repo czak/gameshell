@@ -8,9 +8,12 @@
 
 #include "protocols/wlr-layer-shell-unstable-v1.h"
 
+#include "window.h"
+
 static struct wl_display *wl_display;
 static struct wl_registry *wl_registry;
 static struct wl_compositor *wl_compositor;
+static struct wl_seat *wl_seat;
 static struct zwlr_layer_shell_v1 *zwlr_layer_shell_v1;
 
 static struct wl_surface *wl_surface;
@@ -23,6 +26,7 @@ static EGLContext egl_context;
 static EGLSurface egl_surface;
 
 static void (*on_draw)();
+static void (*on_key)(int key);
 
 static const EGLint config_attributes[] = {
 	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -49,6 +53,10 @@ static void wl_registry_global(void *data, struct wl_registry *wl_registry,
 		wl_compositor = wl_registry_bind(wl_registry, name, &wl_compositor_interface, 4);
 	}
 
+	else if (strcmp(interface, wl_seat_interface.name) == 0) {
+		wl_seat = wl_registry_bind(wl_registry, name, &wl_seat_interface, 7);
+	}
+
 	else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
 		zwlr_layer_shell_v1 = wl_registry_bind(wl_registry, name, &zwlr_layer_shell_v1_interface, 4);
 	}
@@ -60,6 +68,24 @@ static const struct wl_registry_listener wl_registry_listener = {
 	.global_remove = noop,
 };
 
+static void wl_keyboard_key(void *data, struct wl_keyboard *wl_keyboard,
+		uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
+{
+	if (state != WL_KEYBOARD_KEY_STATE_PRESSED) return;
+
+	if (on_key)
+		on_key(key);
+}
+
+static const struct wl_keyboard_listener wl_keyboard_listener = {
+	.keymap = noop,
+	.enter = noop,
+	.leave = noop,
+	.key = wl_keyboard_key,
+	.modifiers = noop,
+	.repeat_info = noop,
+};
+
 static void zwlr_layer_surface_v1_configure(void *data,
 		struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1, uint32_t serial,
 		uint32_t width, uint32_t height)
@@ -69,10 +95,7 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	wl_egl_window_resize(wl_egl_window, width, height, 0, 0);
 	glViewport(0, 0, width, height);
 
-	if (on_draw)
-		on_draw();
-
-	eglSwapBuffers(egl_display, egl_surface);
+	window_redraw();
 }
 
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {
@@ -80,14 +103,14 @@ static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listene
 	.closed = noop,
 };
 
-void window_init(void (*_on_draw)())
+void window_init(void (*_on_draw)(), void (*_on_key)(int key))
 {
 	wl_display = wl_display_connect(NULL);
 	wl_registry = wl_display_get_registry(wl_display);
 	wl_registry_add_listener(wl_registry, &wl_registry_listener, NULL);
 	wl_display_roundtrip(wl_display);
 
-	assert(wl_compositor && zwlr_layer_shell_v1);
+	assert(wl_compositor && wl_seat && zwlr_layer_shell_v1);
 
 	wl_surface = wl_compositor_create_surface(wl_compositor);
 	zwlr_layer_surface_v1 = zwlr_layer_shell_v1_get_layer_surface(
@@ -116,9 +139,15 @@ void window_init(void (*_on_draw)())
 
 	zwlr_layer_surface_v1_add_listener(zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
 	zwlr_layer_surface_v1_set_exclusive_zone(zwlr_layer_surface_v1, -1);
+	zwlr_layer_surface_v1_set_keyboard_interactivity(zwlr_layer_surface_v1,
+			ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
 	wl_surface_commit(wl_surface);
 
+	struct wl_keyboard *wl_keyboard = wl_seat_get_keyboard(wl_seat);
+	wl_keyboard_add_listener(wl_keyboard, &wl_keyboard_listener, NULL);
+
 	on_draw = _on_draw;
+	on_key = _on_key;
 }
 
 int window_dispatch()
@@ -128,5 +157,13 @@ int window_dispatch()
 
 void window_swap()
 {
+	eglSwapBuffers(egl_display, egl_surface);
+}
+
+void window_redraw()
+{
+	if (on_draw)
+		on_draw();
+
 	eglSwapBuffers(egl_display, egl_surface);
 }
