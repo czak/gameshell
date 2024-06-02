@@ -21,6 +21,7 @@ glesv2 = dependency('glesv2')
 executable(
   'gameshell',
   'main.c',
+  'window.c',
   dependencies: [
     protocols,
     wayland,
