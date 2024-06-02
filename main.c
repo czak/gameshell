@@ -47,12 +47,12 @@ int main(int argc, char *argv[])
 	GLuint program = create_shader_program();
 
 	float vertices[] = {
-		0.5f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f,
+		0.5f, 0.5f,
+		0.5f, -0.5f,
+		-0.5f, 0.5f,
 	};
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 
 	while (window_dispatch() != -1) {
 		glClearColor(0.3f, 0.0f, 0.0f, 0.3f);
