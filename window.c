@@ -34,6 +34,7 @@ static struct {
 	void (*on_draw)();
 	void (*on_key)(int key);
 
+	int width, height;
 	int visible;
 } window;
 
@@ -104,8 +105,11 @@ static void zwlr_layer_surface_v1_configure(void *data,
 
 	if (!window.visible) return;
 
-	wl_egl_window_resize(window.wl_egl_window, width, height, 0, 0);
-	glViewport(0, 0, width, height);
+	if (width > 0) window.width = width;
+	if (height > 0) window.height = height;
+
+	wl_egl_window_resize(window.wl_egl_window, window.width, window.height, 0, 0);
+	glViewport(0, 0, window.width, window.height);
 
 	window_redraw();
 }
@@ -150,6 +154,8 @@ void window_init(void (*on_draw)(), void (*on_key)(int key))
 	assert(window.wl_egl_window && window.egl_surface);
 
 	zwlr_layer_surface_v1_add_listener(window.zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
+	zwlr_layer_surface_v1_set_size(window.zwlr_layer_surface_v1, 0, 0);
+	zwlr_layer_surface_v1_set_anchor(window.zwlr_layer_surface_v1, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM + ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 	zwlr_layer_surface_v1_set_exclusive_zone(window.zwlr_layer_surface_v1, -1);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(window.zwlr_layer_surface_v1,
 			ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
@@ -158,6 +164,8 @@ void window_init(void (*on_draw)(), void (*on_key)(int key))
 	struct wl_keyboard *wl_keyboard = wl_seat_get_keyboard(globals.wl_seat);
 	wl_keyboard_add_listener(wl_keyboard, &wl_keyboard_listener, NULL);
 
+	window.width = 1920;
+	window.height = 1080;
 	window.on_draw = on_draw;
 	window.on_key = on_key;
 	window.visible = 1;
@@ -178,16 +186,14 @@ void window_redraw()
 
 void window_toggle()
 {
-	window.visible = 0;
+	if (window.visible) {
+		window.visible = 0;
 
-	wl_surface_attach(window.wl_surface, NULL, 0, 0);
-	wl_surface_commit(window.wl_surface);
-	window_dispatch();
+		wl_surface_attach(window.wl_surface, NULL, 0, 0);
+		wl_surface_commit(window.wl_surface);
+	} else {
+		window.visible = 1;
 
-	sleep(1);
-
-	window.visible = 1;
-
-	eglSwapBuffers(egl.display, window.egl_surface);
-	window_dispatch();
+		eglSwapBuffers(egl.display, window.egl_surface);
+	}
 }
