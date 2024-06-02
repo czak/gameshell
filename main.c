@@ -5,14 +5,13 @@
 #include "window.h"
 
 static const char *vertex_shader_source =
-"attribute vec4 vPosition;\n"
+"attribute vec2 vPosition;\n"
 "void main()\n"
 "{\n"
-"  gl_Position = vPosition;\n"
+"  gl_Position = vec4(2.0f * vPosition.x / 1920.0f - 1.0f, 1.0f - 2.0f * vPosition.y / 1080.0f, 0, 1);\n"
 "}\n";
 
 static const char *fragment_shader_source =
-"precision mediump float;\n"
 "void main()\n"
 "{\n"
 "  gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
@@ -46,13 +45,13 @@ int main(int argc, char *argv[])
 
 	GLuint program = create_shader_program();
 
-	float vertices[] = {
-		0.5f, 0.5f,
-		0.5f, -0.5f,
-		-0.5f, 0.5f,
+	GLushort vertices[] = {
+		10, 10,
+		10, 540,
+		1800, 10,
 	};
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, 0, vertices);
 
 	while (window_dispatch() != -1) {
 		glClearColor(0.3f, 0.0f, 0.0f, 0.3f);

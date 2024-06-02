@@ -108,6 +108,7 @@ void window_init()
 	assert(wl_egl_window && egl_surface);
 
 	zwlr_layer_surface_v1_add_listener(zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
+	zwlr_layer_surface_v1_set_exclusive_zone(zwlr_layer_surface_v1, -1);
 	wl_surface_commit(wl_surface);
 }
 
