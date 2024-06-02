@@ -4,9 +4,6 @@
 
 #include "window.h"
 
-static const int width = 256;
-static const int height = 256;
-
 static const char *vertex_shader_source =
 "attribute vec4 vPosition;\n"
 "void main()\n"
@@ -45,7 +42,7 @@ static GLuint create_shader_program()
 
 int main(int argc, char *argv[])
 {
-	window_init(width, height);
+	window_init();
 
 	GLuint program = create_shader_program();
 

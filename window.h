@@ -1,5 +1,5 @@
 #pragma once
 
-void window_init(int width, int height);
+void window_init();
 int window_dispatch();
 void window_swap();

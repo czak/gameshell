@@ -4,6 +4,7 @@
 #include <wayland-client.h>
 #include <wayland-egl.h>
 #include <EGL/egl.h>
+#include <GLES2/gl2.h>
 
 #include "protocols/wlr-layer-shell-unstable-v1.h"
 
@@ -62,6 +63,9 @@ static void zwlr_layer_surface_v1_configure(void *data,
 		uint32_t width, uint32_t height)
 {
 	zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface_v1, serial);
+
+	wl_egl_window_resize(wl_egl_window, width, height, 0, 0);
+	glViewport(0, 0, width, height);
 }
 
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {
@@ -69,7 +73,7 @@ static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listene
 	.closed = noop,
 };
 
-void window_init(int width, int height)
+void window_init()
 {
 	wl_display = wl_display_connect(NULL);
 	wl_registry = wl_display_get_registry(wl_display);
@@ -97,15 +101,13 @@ void window_init(int width, int height)
 
 	assert(egl_context);
 
-	wl_egl_window = wl_egl_window_create(wl_surface, width, height);
+	wl_egl_window = wl_egl_window_create(wl_surface, 200, 200);
 	egl_surface = eglCreateWindowSurface(egl_display, egl_config, wl_egl_window, NULL);
 	eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
 
 	assert(wl_egl_window && egl_surface);
 
 	zwlr_layer_surface_v1_add_listener(zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
-	zwlr_layer_surface_v1_set_size(zwlr_layer_surface_v1, width, height);
-	zwlr_layer_surface_v1_set_anchor(zwlr_layer_surface_v1, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM + ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT);
 	wl_surface_commit(wl_surface);
 }
 
