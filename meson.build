@@ -6,6 +6,8 @@ if get_option('buildtype').startswith('debug')
   add_project_arguments('-D_LOG_ENABLE', language: 'c')
 endif
 
+subdir('shaders')
+
 protocols = declare_dependency(
   sources: [
     'protocols/xdg-shell.c',
@@ -23,6 +25,7 @@ executable(
   'gameshell',
   'main.c',
   'window.c',
+  shaders,
   dependencies: [
     protocols,
     wayland,

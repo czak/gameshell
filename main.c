@@ -4,27 +4,8 @@
 
 #include "window.h"
 
-static const char *vertex_shader_source =
-"attribute vec2 a_Position;\n"
-"attribute vec2 a_TexCoord;\n"
-"uniform vec2 u_Offset;\n"
-"varying vec2 v_TexCoord;\n"
-"void main()\n"
-"{\n"
-"  float xs = 0.001041666666666666666666667; // 2 / 1920\n"
-"  float ys = 0.001851851851851851851851852; // 2 / 1080\n"
-"  gl_Position = vec4(xs * (a_Position.x + u_Offset.x) - 1.0, 1.0 - ys * (a_Position.y + u_Offset.y), 0.0, 1.0);\n"
-"  v_TexCoord = a_TexCoord / 256.0;\n"
-"}\n";
-
-static const char *fragment_shader_source =
-"precision mediump float;\n"
-"uniform sampler2D u_Sampler;\n"
-"varying vec2 v_TexCoord;\n"
-"void main()\n"
-"{\n"
-"  gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n"
-"}\n";
+#include "vertex_shader.h"
+#include "fragment_shader.h"
 
 static const GLushort vertices[] = {
 	0, 0, 0, 0,
