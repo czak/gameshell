@@ -13,11 +13,11 @@ struct vertex {
 	GLushort s, t;
 };
 
-static const struct vertex vertices[] = {
-	{ 0, 0, 0, 0 },
-	{ 0, 162, 0, 256 },
-	{ 240, 0, 256, 0 },
-	{ 240, 162, 256, 256 },
+static struct vertex vertices[] = {
+	{ 0, 0, 0, 9 },
+	{ 0, 36, 0, 18 },
+	{ 20, 0, 5, 9 },
+	{ 20, 36, 5, 18 },
 };
 
 static GLuint program;
@@ -59,6 +59,28 @@ static void texture_init()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 80, 54, 0, GL_ALPHA, GL_UNSIGNED_BYTE, font);
 }
 
+static void text_write(const char *msg, int px, int py)
+{
+	while (*msg != '\0') {
+		int index = *msg - ' ';
+
+		int s = (index % 16) * 5;
+		int t = (index / 16) * 9;
+
+		vertices[0].s = s;     vertices[0].t = t;
+		vertices[1].s = s;     vertices[1].t = t + 9;
+		vertices[2].s = s + 5; vertices[2].t = t;
+		vertices[3].s = s + 5; vertices[3].t = t + 9;
+
+		glUniform2f(0, px, py);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		px += 24;
+
+		msg++;
+	}
+}
+
 static void on_draw()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.2f);
@@ -69,8 +91,7 @@ static void on_draw()
 	glUseProgram(program);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glUniform2f(0, 10.0f, 10.0f);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	text_write("Hello, world!", 10, 10);
 }
 
 static void on_key(int key)
