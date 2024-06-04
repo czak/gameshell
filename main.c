@@ -3,18 +3,19 @@
 #include <GLES2/gl2.h>
 
 #include "window.h"
+#include "font.h"
 
 #include "vertex_shader.h"
 #include "fragment_shader.h"
 
 static const GLushort vertices[] = {
 	0, 0, 0, 0,
-	0, 128, 0, 256,
-	128, 0, 256, 0,
+	0, 162, 0, 256,
+	240, 0, 256, 0,
 
-	128, 0, 256, 0,
-	0, 128, 0, 256,
-	128, 128, 256, 256,
+	240, 0, 256, 0,
+	0, 162, 0, 256,
+	240, 162, 256, 256,
 };
 
 static GLuint program;
@@ -53,20 +54,12 @@ static void texture_init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	uint8_t data[256*256];
-
-	for (int y = 0; y < 256; y++) {
-		for (int x = 0; x < 256; x++) {
-			data[256 * y + x] = x ^ y;
-		}
-	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 256, 256, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 80, 54, 0, GL_ALPHA, GL_UNSIGNED_BYTE, font);
 }
 
 static void on_draw()
 {
-	glClearColor(0.2f, 0.0f, 0.0f, 0.3f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.2f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnableVertexAttribArray(0);
@@ -75,9 +68,6 @@ static void on_draw()
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	glUniform2f(0, 10.0f, 10.0f);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glUniform2f(0, 200.0f, 10.0f);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -110,6 +100,9 @@ int main(int argc, char *argv[])
 
 	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, 4 * sizeof(GLushort), &vertices[0]);
 	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, 4 * sizeof(GLushort), &vertices[2]);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	while (running && window_dispatch() != -1) {
 	}
