@@ -17,9 +17,6 @@ static const struct vertex vertices[] = {
 	{ 0, 0, 0, 0 },
 	{ 0, 162, 0, 256 },
 	{ 240, 0, 256, 0 },
-
-	{ 240, 0, 256, 0 },
-	{ 0, 162, 0, 256 },
 	{ 240, 162, 256, 256 },
 };
 
@@ -73,7 +70,7 @@ static void on_draw()
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	glUniform2f(0, 10.0f, 10.0f);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 static void on_key(int key)
