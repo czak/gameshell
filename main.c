@@ -8,14 +8,19 @@
 #include "vertex_shader.h"
 #include "fragment_shader.h"
 
-static const GLushort vertices[] = {
-	0, 0, 0, 0,
-	0, 162, 0, 256,
-	240, 0, 256, 0,
+struct vertex {
+	GLushort x, y;
+	GLushort s, t;
+};
 
-	240, 0, 256, 0,
-	0, 162, 0, 256,
-	240, 162, 256, 256,
+static const struct vertex vertices[] = {
+	{ 0, 0, 0, 0 },
+	{ 0, 162, 0, 256 },
+	{ 240, 0, 256, 0 },
+
+	{ 240, 0, 256, 0 },
+	{ 0, 162, 0, 256 },
+	{ 240, 162, 256, 256 },
 };
 
 static GLuint program;
@@ -98,8 +103,8 @@ int main(int argc, char *argv[])
 	program_init();
 	texture_init();
 
-	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, 4 * sizeof(GLushort), &vertices[0]);
-	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, 4 * sizeof(GLushort), &vertices[2]);
+	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
+	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLushort));
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
