@@ -18,6 +18,12 @@ static struct vertex {
 static GLuint program;
 static GLuint texture;
 
+static struct {
+	GLint offset;
+	GLint viewport;
+	GLint color;
+} uniforms;
+
 static int running = 1;
 
 static void program_init()
@@ -38,6 +44,10 @@ static void program_init()
 	int success;
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	assert(success);
+
+	uniforms.offset = glGetUniformLocation(program, "u_Offset");
+	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
+	uniforms.color = glGetUniformLocation(program, "u_Color");
 }
 
 static void texture_init()
@@ -73,7 +83,7 @@ static void text_write(const char *msg, int px, int py)
 		vertices[3].x = g->pr;	vertices[3].y = g->pb;
 		vertices[3].s = g->tr;	vertices[3].t = g->tb;
 
-		glUniform2f(0, px, py);
+		glUniform2f(uniforms.offset, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		px += g->xadvance;
@@ -92,14 +102,14 @@ static void on_draw()
 	glUseProgram(program);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glUniform3f(3, 1.0f, 0.75f, 0.3f);
+	glUniform3f(uniforms.color, 1.0f, 0.75f, 0.3f);
 	text_write("Hello, world!", 10, 10);
 }
 
 static void on_resize(int width, int height)
 {
 	glViewport(0, 0, width, height);
-	glUniform2f(1, 2.0f / width, 2.0f / height);
+	glUniform2f(uniforms.viewport, 2.0f / width, 2.0f / height);
 }
 
 static void on_key(int key)
