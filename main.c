@@ -94,7 +94,7 @@ static void text_write(const char *msg, int px, int py)
 
 static void on_draw()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.2f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.6f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnableVertexAttribArray(0);
