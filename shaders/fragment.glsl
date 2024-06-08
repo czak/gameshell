@@ -8,5 +8,5 @@ varying vec2 v_TexCoord;
 void main()
 {
   float a = texture2D(u_Sampler, v_TexCoord).a;
-  gl_FragColor = vec4(u_Color.xyz * a, a);
+  gl_FragColor = vec4(u_Color.xyz, a);
 }
