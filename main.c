@@ -16,7 +16,7 @@ static struct vertex {
 } vertices[4];
 
 static GLuint program;
-static GLuint texture;
+static GLuint texture_font;
 
 static struct {
 	GLint offset;
@@ -50,8 +50,10 @@ static void program_init()
 	uniforms.color = glGetUniformLocation(program, "u_Color");
 }
 
-static void texture_init()
+static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const void *pixels)
 {
+	GLuint texture;
+
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -61,7 +63,9 @@ static void texture_init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512, 512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, font.texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, pixels);
+
+	return texture;
 }
 
 static void text_write(const char *msg, int px, int py)
@@ -100,7 +104,7 @@ static void on_draw()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glUseProgram(program);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, texture_font);
 
 	glUniform3f(uniforms.color, 1.0f, 1.0f, 1.0f);
 	text_write("Hello, world!", 10, 10);
@@ -137,7 +141,7 @@ int main(int argc, char *argv[])
 	window_init(on_draw, on_resize, on_key);
 
 	program_init();
-	texture_init();
+	texture_font = texture_init(GL_ALPHA, 512, 512, font.texture);
 
 	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
 	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLushort));
