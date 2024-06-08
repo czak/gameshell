@@ -26,6 +26,7 @@ executable(
   'main.c',
   'window.c',
   'fonts/chakra_petch_80.c',
+  'boxart/ghostrunner.c',
   shaders,
   dependencies: [
     protocols,

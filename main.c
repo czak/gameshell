@@ -12,6 +12,7 @@
 #define SHADER_ID_SOLID 1
 
 extern struct font font;
+extern unsigned char ___boxart_ghostrunner_rgb[];
 
 static struct vertex {
 	GLushort x, y;
@@ -20,6 +21,7 @@ static struct vertex {
 
 static GLuint program;
 static GLuint texture_font;
+static GLuint texture_boxart;
 
 static struct {
 	GLint shader_id;
@@ -100,13 +102,29 @@ static void text_write(const char *msg, int px, int py, float r, float g, float 
 	}
 }
 
+static void image_draw(int px, int py)
+{
+	glBindTexture(GL_TEXTURE_2D, texture_boxart);
+	glUniform1i(uniforms.shader_id, SHADER_ID_IMAGE);
+
+	vertices[0] = (struct vertex){ 0, 0, 0, 0 };
+	vertices[1] = (struct vertex){ 0, 450, 0, 512 };
+	vertices[2] = (struct vertex){ 300, 0, 512, 0 };
+	vertices[3] = (struct vertex){ 300, 450, 512, 512 };
+
+	glUniform2f(uniforms.offset, px, py);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
 static void on_draw()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	text_write("Hello, world!", 10, 10, 1.0f, 0.75f, 0.3f);
 	text_write("How are you?", 10, 100, 1.0f, 1.0f, 1.0f);
+
+	image_draw(600, 10);
 }
 
 static void on_resize(int width, int height)
@@ -140,6 +158,7 @@ int main(int argc, char *argv[])
 	window_init(on_draw, on_resize, on_key);
 
 	texture_font = texture_init(GL_ALPHA, 512, 512, font.texture);
+	texture_boxart = texture_init(GL_RGB, 600, 900, ___boxart_ghostrunner_rgb);
 
 	program_init();
 
