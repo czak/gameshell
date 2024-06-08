@@ -13,7 +13,6 @@
 #define SHADER_ID_TEXT 1
 
 extern struct font font;
-extern unsigned char ___boxart_ghostrunner_rgb[];
 
 static struct vertex {
 	GLshort x, y;
