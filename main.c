@@ -4,6 +4,7 @@
 
 #include "window.h"
 #include "font.h"
+#include "image.h"
 
 #include "vertex_shader.h"
 #include "fragment_shader.h"
@@ -21,7 +22,7 @@ static struct vertex {
 
 static GLuint program;
 static GLuint texture_font;
-static GLuint texture_boxart;
+static GLuint texture_boxarts[2];
 
 static struct {
 	GLint shader_id;
@@ -102,9 +103,9 @@ static void text_write(const char *msg, int px, int py, float r, float g, float 
 	}
 }
 
-static void image_draw(int px, int py)
+static void image_draw(GLuint texture, int px, int py)
 {
-	glBindTexture(GL_TEXTURE_2D, texture_boxart);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(uniforms.shader_id, SHADER_ID_IMAGE);
 
 	vertices[0] = (struct vertex){ 0, 0, 0, 0 };
@@ -124,7 +125,8 @@ static void on_draw()
 	text_write("Hello, world!", 10, 10, 1.0f, 0.75f, 0.3f);
 	text_write("How are jou?", 10, 100, 1.0f, 1.0f, 1.0f);
 
-	image_draw(600, 10);
+	image_draw(texture_boxarts[0], 600, 10);
+	image_draw(texture_boxarts[1], 950, 10);
 }
 
 static void on_resize(int width, int height)
@@ -158,7 +160,16 @@ int main(int argc, char *argv[])
 	window_init(on_draw, on_resize, on_key);
 
 	texture_font = texture_init(GL_ALPHA, 512, 512, font.texture);
-	texture_boxart = texture_init(GL_RGB, 600, 900, ___boxart_ghostrunner_rgb);
+
+	int w, h;
+	unsigned char *boxart;
+	boxart = image_load("boxart/witcher3.png", &w, &h);
+	texture_boxarts[0] = texture_init(GL_RGB, w, h, boxart);
+	image_free(boxart);
+
+	boxart = image_load("boxart/ghostrunner.png", &w, &h);
+	texture_boxarts[1] = texture_init(GL_RGB, w, h, boxart);
+	image_free(boxart);
 
 	program_init();
 

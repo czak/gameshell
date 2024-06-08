@@ -16,6 +16,7 @@ protocols = declare_dependency(
   include_directories: ['protocols'],
 )
 
+math = meson.get_compiler('c').find_library('m')
 wayland = dependency('wayland-client')
 wayland_egl = dependency('wayland-egl')
 egl = dependency('egl')
@@ -25,10 +26,11 @@ executable(
   'gameshell',
   'main.c',
   'window.c',
+  'image.c',
   'fonts/chakra_petch_80.c',
-  'boxart/ghostrunner.c',
   shaders,
   dependencies: [
+    math,
     protocols,
     wayland,
     wayland_egl,
