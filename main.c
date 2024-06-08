@@ -8,17 +8,12 @@
 #include "vertex_shader.h"
 #include "fragment_shader.h"
 
-struct vertex {
+extern struct font font;
+
+static struct vertex {
 	GLushort x, y;
 	GLushort s, t;
-};
-
-static struct vertex vertices[] = {
-	{ 0, 0, 0, 9 },
-	{ 0, 36, 0, 18 },
-	{ 20, 0, 5, 9 },
-	{ 20, 36, 5, 18 },
-};
+} vertices[4];
 
 static GLuint program;
 static GLuint texture;
@@ -50,13 +45,13 @@ static void texture_init()
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 80, 54, 0, GL_ALPHA, GL_UNSIGNED_BYTE, font);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512, 512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, font.texture);
 }
 
 static void text_write(const char *msg, int px, int py)
@@ -64,18 +59,24 @@ static void text_write(const char *msg, int px, int py)
 	while (*msg != '\0') {
 		int index = *msg - ' ';
 
-		int s = (index % 16) * 5;
-		int t = (index / 16) * 9;
+		struct glyph *g = &font.glyphs[index];
 
-		vertices[0].s = s;     vertices[0].t = t;
-		vertices[1].s = s;     vertices[1].t = t + 9;
-		vertices[2].s = s + 5; vertices[2].t = t;
-		vertices[3].s = s + 5; vertices[3].t = t + 9;
+		vertices[0].x = g->pl;	vertices[0].y = g->pt;
+		vertices[0].s = g->tl;	vertices[0].t = g->tt;
+
+		vertices[1].x = g->pl;	vertices[1].y = g->pb;
+		vertices[1].s = g->tl;	vertices[1].t = g->tb;
+
+		vertices[2].x = g->pr;	vertices[2].y = g->pt;
+		vertices[2].s = g->tr;	vertices[2].t = g->tt;
+
+		vertices[3].x = g->pr;	vertices[3].y = g->pb;
+		vertices[3].s = g->tr;	vertices[3].t = g->tb;
 
 		glUniform2f(0, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		px += 24;
+		px += g->xadvance;
 
 		msg++;
 	}

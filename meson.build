@@ -25,6 +25,7 @@ executable(
   'gameshell',
   'main.c',
   'window.c',
+  'font.c',
   shaders,
   dependencies: [
     protocols,
