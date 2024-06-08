@@ -10,7 +10,7 @@
 #include "fragment_shader.h"
 
 #define SHADER_ID_IMAGE 0
-#define SHADER_ID_SOLID 1
+#define SHADER_ID_TEXT 1
 
 extern struct font font;
 extern unsigned char ___boxart_ghostrunner_rgb[];
@@ -81,7 +81,7 @@ static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const vo
 static void text_write(const char *msg, int px, int py, float r, float g, float b)
 {
 	glBindTexture(GL_TEXTURE_2D, texture_font);
-	glUniform1i(uniforms.shader_id, SHADER_ID_SOLID);
+	glUniform1i(uniforms.shader_id, SHADER_ID_TEXT);
 	glUniform3f(uniforms.color, r, g, b);
 
 	while (*msg != '\0') {

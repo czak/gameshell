@@ -1,7 +1,7 @@
 precision mediump float;
 
 #define SHADER_ID_IMAGE 0
-#define SHADER_ID_SOLID 1
+#define SHADER_ID_TEXT 1
 
 uniform sampler2D u_Sampler;
 uniform vec3 u_Color;
@@ -13,7 +13,7 @@ void main()
 {
   vec4 texColor = texture2D(u_Sampler, v_TexCoord);
 
-  if (u_ShaderId == SHADER_ID_SOLID) {
+  if (u_ShaderId == SHADER_ID_TEXT) {
     texColor = vec4(u_Color.xyz, texColor.a);
   }
 
