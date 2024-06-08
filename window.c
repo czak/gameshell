@@ -158,7 +158,7 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 	assert(window.wl_egl_window && window.egl_surface);
 
 	zwlr_layer_surface_v1_add_listener(window.zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
-	zwlr_layer_surface_v1_set_size(window.zwlr_layer_surface_v1, 0, 200);
+	zwlr_layer_surface_v1_set_size(window.zwlr_layer_surface_v1, 0, 600);
 	zwlr_layer_surface_v1_set_margin(window.zwlr_layer_surface_v1, 10, 10, 10, 10);
 	zwlr_layer_surface_v1_set_anchor(window.zwlr_layer_surface_v1, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 	zwlr_layer_surface_v1_set_exclusive_zone(window.zwlr_layer_surface_v1, -1);
