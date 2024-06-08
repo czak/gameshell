@@ -92,6 +92,7 @@ static void on_draw()
 	glUseProgram(program);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
+	glUniform3f(3, 1.0f, 0.75f, 0.3f);
 	text_write("Hello, world!", 10, 10);
 }
 
