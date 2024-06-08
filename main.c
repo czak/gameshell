@@ -95,6 +95,12 @@ static void on_draw()
 	text_write("Hello, world!", 10, 10);
 }
 
+static void on_resize(int width, int height)
+{
+	glViewport(0, 0, width, height);
+	glUniform2f(1, 2.0f / width, 2.0f / height);
+}
+
 static void on_key(int key)
 {
 	switch (key) {
@@ -117,7 +123,7 @@ static void on_key(int key)
 
 int main(int argc, char *argv[])
 {
-	window_init(on_draw, on_key);
+	window_init(on_draw, on_resize, on_key);
 
 	program_init();
 	texture_init();

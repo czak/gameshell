@@ -32,6 +32,7 @@ static struct {
 	EGLSurface egl_surface;
 
 	void (*on_draw)();
+	void (*on_resize)(int width, int height);
 	void (*on_key)(int key);
 
 	int width, height;
@@ -111,7 +112,8 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	wl_egl_window_resize(window.wl_egl_window, window.width, window.height, 0, 0);
 	wl_surface_commit(window.wl_surface);
 
-	glViewport(0, 0, window.width, window.height);
+	if (window.on_resize)
+		window.on_resize(window.width, window.height);
 
 	window_redraw();
 }
@@ -121,7 +123,7 @@ static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listene
 	.closed = noop,
 };
 
-void window_init(void (*on_draw)(), void (*on_key)(int key))
+void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), void (*on_key)(int key))
 {
 	globals.wl_display = wl_display_connect(NULL);
 	globals.wl_registry = wl_display_get_registry(globals.wl_display);
@@ -156,8 +158,9 @@ void window_init(void (*on_draw)(), void (*on_key)(int key))
 	assert(window.wl_egl_window && window.egl_surface);
 
 	zwlr_layer_surface_v1_add_listener(window.zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
-	zwlr_layer_surface_v1_set_size(window.zwlr_layer_surface_v1, 0, 0);
-	zwlr_layer_surface_v1_set_anchor(window.zwlr_layer_surface_v1, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM + ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+	zwlr_layer_surface_v1_set_size(window.zwlr_layer_surface_v1, 0, 200);
+	zwlr_layer_surface_v1_set_margin(window.zwlr_layer_surface_v1, 10, 10, 10, 10);
+	zwlr_layer_surface_v1_set_anchor(window.zwlr_layer_surface_v1, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 	zwlr_layer_surface_v1_set_exclusive_zone(window.zwlr_layer_surface_v1, -1);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(window.zwlr_layer_surface_v1,
 			ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
@@ -169,6 +172,7 @@ void window_init(void (*on_draw)(), void (*on_key)(int key))
 	window.width = 1920;
 	window.height = 1080;
 	window.on_draw = on_draw;
+	window.on_resize = on_resize;
 	window.on_key = on_key;
 	window.visible = 1;
 }
