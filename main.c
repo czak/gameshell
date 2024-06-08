@@ -94,7 +94,7 @@ static void text_write(const char *msg, int px, int py)
 
 static void on_draw()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.6f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnableVertexAttribArray(0);
@@ -102,7 +102,7 @@ static void on_draw()
 	glUseProgram(program);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glUniform3f(uniforms.color, 1.0f, 0.75f, 0.3f);
+	glUniform3f(uniforms.color, 1.0f, 1.0f, 1.0f);
 	text_write("Hello, world!", 10, 10);
 }
 

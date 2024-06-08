@@ -25,7 +25,7 @@ executable(
   'gameshell',
   'main.c',
   'window.c',
-  'font.c',
+  'fonts/chakra_petch_80.c',
   shaders,
   dependencies: [
     protocols,
