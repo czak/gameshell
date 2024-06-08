@@ -8,6 +8,9 @@
 #include "vertex_shader.h"
 #include "fragment_shader.h"
 
+#define SHADER_ID_IMAGE 0
+#define SHADER_ID_SOLID 1
+
 extern struct font font;
 
 static struct vertex {
@@ -19,6 +22,7 @@ static GLuint program;
 static GLuint texture_font;
 
 static struct {
+	GLint shader_id;
 	GLint offset;
 	GLint viewport;
 	GLint color;
@@ -45,9 +49,12 @@ static void program_init()
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	assert(success);
 
+	uniforms.shader_id = glGetUniformLocation(program, "u_ShaderId");
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
 	uniforms.color = glGetUniformLocation(program, "u_Color");
+
+	glUseProgram(program);
 }
 
 static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const void *pixels)
@@ -68,8 +75,12 @@ static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const vo
 	return texture;
 }
 
-static void text_write(const char *msg, int px, int py)
+static void text_write(const char *msg, int px, int py, float r, float g, float b)
 {
+	glBindTexture(GL_TEXTURE_2D, texture_font);
+	glUniform1i(uniforms.shader_id, SHADER_ID_SOLID);
+	glUniform3f(uniforms.color, r, g, b);
+
 	while (*msg != '\0') {
 		int index = *msg - ' ';
 
@@ -101,13 +112,8 @@ static void on_draw()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glUseProgram(program);
-	glBindTexture(GL_TEXTURE_2D, texture_font);
-
-	glUniform3f(uniforms.color, 1.0f, 1.0f, 1.0f);
-	text_write("Hello, world!", 10, 10);
+	text_write("Hello, world!", 10, 10, 1.0f, 0.75f, 0.3f);
+	text_write("How are you?", 10, 100, 1.0f, 1.0f, 1.0f);
 }
 
 static void on_resize(int width, int height)
@@ -140,11 +146,14 @@ int main(int argc, char *argv[])
 {
 	window_init(on_draw, on_resize, on_key);
 
-	program_init();
 	texture_font = texture_init(GL_ALPHA, 512, 512, font.texture);
+
+	program_init();
 
 	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
 	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLushort));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
 	glEnable(GL_BLEND);
 	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
