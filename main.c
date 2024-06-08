@@ -86,17 +86,10 @@ static void text_write(const char *msg, int px, int py, float r, float g, float 
 
 		struct glyph *g = &font.glyphs[index];
 
-		vertices[0].x = g->pl;	vertices[0].y = g->pt;
-		vertices[0].s = g->tl;	vertices[0].t = g->tt;
-
-		vertices[1].x = g->pl;	vertices[1].y = g->pb;
-		vertices[1].s = g->tl;	vertices[1].t = g->tb;
-
-		vertices[2].x = g->pr;	vertices[2].y = g->pt;
-		vertices[2].s = g->tr;	vertices[2].t = g->tt;
-
-		vertices[3].x = g->pr;	vertices[3].y = g->pb;
-		vertices[3].s = g->tr;	vertices[3].t = g->tb;
+		vertices[0] = (struct vertex){ g->pl, g->pt, g->tl, g->tt };
+		vertices[1] = (struct vertex){ g->pl, g->pb, g->tl, g->tb };
+		vertices[2] = (struct vertex){ g->pr, g->pt, g->tr, g->tt };
+		vertices[3] = (struct vertex){ g->pr, g->pb, g->tr, g->tb };
 
 		glUniform2f(uniforms.offset, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
