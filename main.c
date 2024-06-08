@@ -15,7 +15,7 @@ extern struct font font;
 extern unsigned char ___boxart_ghostrunner_rgb[];
 
 static struct vertex {
-	GLushort x, y;
+	GLshort x, y;
 	GLushort s, t;
 } vertices[4];
 
@@ -122,7 +122,7 @@ static void on_draw()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	text_write("Hello, world!", 10, 10, 1.0f, 0.75f, 0.3f);
-	text_write("How are you?", 10, 100, 1.0f, 1.0f, 1.0f);
+	text_write("How are jou?", 10, 100, 1.0f, 1.0f, 1.0f);
 
 	image_draw(600, 10);
 }
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 
 	program_init();
 
-	glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
+	glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
 	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLushort));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
