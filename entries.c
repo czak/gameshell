@@ -1,18 +1,43 @@
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "entries.h"
 
-struct entry *entries[] = {
-	&(struct entry){ "Ghostrunner", "/home/czak/projects/gameshell/boxart/ghostrunner.png" },
-	&(struct entry){ "GRID", "/home/czak/projects/gameshell/boxart/grid.png" },
-	&(struct entry){ "Virtua Tennis 3", "/home/czak/projects/gameshell/boxart/virtuatennis3.png" },
-	&(struct entry){ "Witcher 3", "/home/czak/projects/gameshell/boxart/witcher3.png" },
-	&(struct entry){ "Wolfenstein: The New Colossus", "/home/czak/projects/gameshell/boxart/wolfenstein.png" },
-	NULL,
-};
+#define MAX_ENTRIES 30
 
-int entries_count = 5;
+struct entry *entries[MAX_ENTRIES] = {0};
+int entries_count = 0;
+
+static char *read_line(FILE *f)
+{
+	char *line = NULL;
+	size_t n;
+	ssize_t res = getline(&line, &n, f);
+	if (res == -1) {
+		return NULL;
+	}
+	if (line[res-1] == '\n') {
+		line[res-1] = '\0';
+	}
+	return line;
+}
 
 void entries_load()
 {
+	FILE *f = fopen("/home/czak/.config/gameshell/entries", "r");
+	if (!f) {
+		fprintf(stderr, "No entries file.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	while (entries_count < MAX_ENTRIES) {
+		char *line = read_line(f);
+		if (line == NULL) break;
+
+		struct entry *entry = calloc(1, sizeof(struct entry));
+		entry->filename = line;
+
+		entries[entries_count++] = entry;
+	}
 }
