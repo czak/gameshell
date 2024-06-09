@@ -5,6 +5,7 @@
 #include "entries.h"
 
 static int running = 1;
+static int active = 0;
 
 static void on_draw()
 {
@@ -12,6 +13,10 @@ static void on_draw()
 
 	int px = 50;
 	for (int i = 0; i < entries_count; i++) {
+		if (i == active) {
+			gfx_draw_rect(px, 50, 1.0f, 0.75f, 0.3f);
+		}
+
 		gfx_draw_image(entries[i]->image, px, 50);
 		px += 350;
 	}

@@ -4,6 +4,7 @@
 
 #define SHADER_ID_IMAGE 0
 #define SHADER_ID_TEXT 1
+#define SHADER_ID_SOLID 2
 
 #include "font.h"
 #include "image.h"
@@ -141,6 +142,20 @@ void gfx_draw_image(unsigned int texture, int px, int py)
 	vertices[1] = (struct vertex){ 0, 450, 0, 512 };
 	vertices[2] = (struct vertex){ 300, 0, 512, 0 };
 	vertices[3] = (struct vertex){ 300, 450, 512, 512 };
+
+	glUniform2f(uniforms.offset, px, py);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void gfx_draw_rect(int px, int py, float r, float g, float b)
+{
+	glUniform1i(uniforms.shader_id, SHADER_ID_SOLID);
+	glUniform3f(uniforms.color, r, g, b);
+
+	vertices[0] = (struct vertex){ -10, -10 };
+	vertices[1] = (struct vertex){ -10, 460 };
+	vertices[2] = (struct vertex){ 310, -10 };
+	vertices[3] = (struct vertex){ 310, 460 };
 
 	glUniform2f(uniforms.offset, px, py);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
