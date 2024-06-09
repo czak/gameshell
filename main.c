@@ -37,6 +37,16 @@ static void on_key(int key)
 			window_redraw();
 			break;
 
+		case 105: // Left
+			if (active > 0) active--;
+			window_redraw();
+			break;
+
+		case 106: // Right
+			if (active < entries_count - 1) active++;
+			window_redraw();
+			break;
+
 		default:
 			fprintf(stderr, "key: %d\n", key);
 	}
