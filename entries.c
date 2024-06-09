@@ -4,6 +4,8 @@
 
 #include "entries.h"
 
+static const char *config_path = ".config/gameshell/entries";
+
 struct entry **entries = NULL;
 int entries_count = 0;
 int entries_capacity = 0;
@@ -32,21 +34,46 @@ static void append(struct entry *entry)
 	entries[entries_count++] = entry;
 }
 
+static char *get_path()
+{
+	const char *home = getenv("HOME");
+	if (!home) {
+		return NULL;
+	}
+
+	char *path = NULL;
+	int ret = asprintf(&path, "%s/%s", home, config_path);
+	if (ret == -1) {
+		return NULL;
+	}
+
+	return path;
+}
+
 void entries_load()
 {
-	FILE *f = fopen("/home/czak/.config/gameshell/entries", "r");
+	char *path = get_path();
+	if (!path) {
+		fprintf(stderr, "$HOME/%s not found.\n", config_path);
+		exit(EXIT_FAILURE);
+	}
+
+	FILE *f = fopen(path, "r");
 	if (!f) {
-		fprintf(stderr, "No entries file.\n");
+		fprintf(stderr, "Unable to open %s.\n", path);
+		free(path);
 		exit(EXIT_FAILURE);
 	}
 
 	while (1) {
 		char *line = read_line(f);
-		if (line == NULL) break;
+		if (!line) break;
 
 		struct entry *entry = calloc(1, sizeof(struct entry));
 		entry->filename = line;
 
 		append(entry);
 	}
+
+	free(path);
 }
