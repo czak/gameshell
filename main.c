@@ -3,7 +3,17 @@
 #include "window.h"
 #include "gfx.h"
 
-static unsigned int boxarts[2];
+static struct {
+	char *name;
+	char *filename;
+	int image;
+} entries[] = {
+	{ "Ghostrunner", "/home/czak/projects/gameshell/boxart/ghostrunner.png" },
+	{ "GRID", "/home/czak/projects/gameshell/boxart/grid.png" },
+	{ "Virtua Tennis 3", "/home/czak/projects/gameshell/boxart/virtuatennis3.png" },
+	{ "Witcher 3", "/home/czak/projects/gameshell/boxart/witcher3.png" },
+	{ "Wolfenstein: The New Colossus", "/home/czak/projects/gameshell/boxart/wolfenstein.png" },
+};
 
 static int running = 1;
 
@@ -11,11 +21,11 @@ static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
-	gfx_draw_text("Hello, world!", 10, 10, 1.0f, 0.75f, 0.3f);
-	gfx_draw_text("How are jou?", 10, 100, 1.0f, 1.0f, 1.0f);
-
-	gfx_draw_image(boxarts[0], 600, 10);
-	gfx_draw_image(boxarts[1], 950, 10);
+	int px = 50;
+	for (int i = 0; i < sizeof(entries) / sizeof(entries[0]); i++) {
+		gfx_draw_image(entries[i].image, px, 50);
+		px += 350;
+	}
 }
 
 static void on_key(int key)
@@ -43,8 +53,9 @@ int main(int argc, char *argv[])
 	window_init(on_draw, gfx_resize, on_key);
 	gfx_init();
 
-	boxarts[0] = gfx_image_load("boxart/witcher3.png");
-	boxarts[1] = gfx_image_load("boxart/ghostrunner.png");
+	for (int i = 0; i < sizeof(entries) / sizeof(entries[0]); i++) {
+		entries[i].image = gfx_image_load(entries[i].filename);
+	}
 
 	while (running && window_dispatch() != -1) {
 	}
