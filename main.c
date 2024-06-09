@@ -1,8 +1,7 @@
-#include <stdio.h>
-
 #include "window.h"
 #include "gfx.h"
 #include "entries.h"
+#include "log.h"
 
 static int running = 1;
 static int active = 0;
@@ -48,7 +47,7 @@ static void on_key(int key)
 			break;
 
 		default:
-			fprintf(stderr, "key: %d\n", key);
+			LOG("key: %d", key);
 	}
 }
 

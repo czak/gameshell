@@ -29,6 +29,7 @@ executable(
   'image.c',
   'gfx.c',
   'entries.c',
+  'log.c',
   'fonts/chakra_petch_80.c',
   shaders,
   dependencies: [
