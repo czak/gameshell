@@ -4,10 +4,9 @@
 
 #include "entries.h"
 
-#define MAX_ENTRIES 30
-
-struct entry *entries[MAX_ENTRIES] = {0};
+struct entry **entries = NULL;
 int entries_count = 0;
+int entries_capacity = 0;
 
 static char *read_line(FILE *f)
 {
@@ -23,6 +22,16 @@ static char *read_line(FILE *f)
 	return line;
 }
 
+static void append(struct entry *entry)
+{
+	if (entries_count == entries_capacity) {
+		entries_capacity = entries_capacity * 2 + 1;
+		entries = reallocarray(entries, entries_capacity, sizeof(struct entry *));
+	}
+
+	entries[entries_count++] = entry;
+}
+
 void entries_load()
 {
 	FILE *f = fopen("/home/czak/.config/gameshell/entries", "r");
@@ -31,13 +40,13 @@ void entries_load()
 		exit(EXIT_FAILURE);
 	}
 
-	while (entries_count < MAX_ENTRIES) {
+	while (1) {
 		char *line = read_line(f);
 		if (line == NULL) break;
 
 		struct entry *entry = calloc(1, sizeof(struct entry));
 		entry->filename = line;
 
-		entries[entries_count++] = entry;
+		append(entry);
 	}
 }
