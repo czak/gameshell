@@ -1,3 +1,5 @@
+#include <poll.h>
+
 #include "window.h"
 #include "gfx.h"
 #include "entries.h"
@@ -62,6 +64,17 @@ int main(int argc, char *argv[])
 		entries[i]->image = gfx_image_load(entries[i]->filename);
 	}
 
-	while (running && window_dispatch() != -1) {
+	while (running) {
+		window_flush();
+
+		struct pollfd pollfds[] = {
+			{ .fd = window_get_fd(), .events = POLLIN },
+		};
+
+		poll(pollfds, sizeof(pollfds) / sizeof(pollfds[0]), -1);
+
+		if (pollfds[0].revents) {
+			window_dispatch();
+		}
 	}
 }

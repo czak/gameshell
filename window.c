@@ -177,6 +177,16 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 	window.visible = 1;
 }
 
+int window_get_fd()
+{
+	return wl_display_get_fd(globals.wl_display);
+}
+
+void window_flush()
+{
+	wl_display_flush(globals.wl_display);
+}
+
 int window_dispatch()
 {
 	return wl_display_dispatch(globals.wl_display);
