@@ -40,8 +40,6 @@ static int gamepad_open()
 	}
 
 	for (int i = 0; i < num_devices; i++) {
-		LOG("%d/%d: %s", i, num_devices, namelist[i]->d_name);
-
 		char path[300];
 		snprintf(path, sizeof(path), "/dev/input/%s", namelist[i]->d_name);
 
