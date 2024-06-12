@@ -200,6 +200,11 @@ void window_redraw()
 	eglSwapBuffers(egl.display, window.egl_surface);
 }
 
+int window_visible()
+{
+	return window.visible;
+}
+
 void window_toggle()
 {
 	if (window.visible) {

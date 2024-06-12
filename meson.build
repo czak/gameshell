@@ -30,6 +30,7 @@ executable(
   'gfx.c',
   'entries.c',
   'log.c',
+  'gamepad.c',
   'fonts/chakra_petch_80.c',
   shaders,
   dependencies: [

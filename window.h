@@ -5,4 +5,5 @@ int window_get_fd();
 void window_flush();
 int window_dispatch();
 void window_redraw();
+int window_visible();
 void window_toggle();
