@@ -48,12 +48,10 @@ static void on_button(int button)
 
 		case BTN_DPAD_LEFT:
 			if (active > 0) active--;
-			window_redraw();
 			break;
 
 		case BTN_DPAD_RIGHT:
 			if (active < entries_count - 1) active++;
-			window_redraw();
 			break;
 	}
 
