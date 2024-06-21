@@ -72,7 +72,7 @@ void gfx_init()
 
 	// Prepare to draw quads with texture coords
 	glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
-	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLushort));
+	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLshort));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
