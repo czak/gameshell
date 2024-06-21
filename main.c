@@ -13,14 +13,15 @@ static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
-	int px = 50;
+	int py = 50;
 	for (int i = 0; i < entries_count; i++) {
 		if (i == active) {
-			gfx_draw_rect(px, 50, 1.0f, 0.75f, 0.3f);
+			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 0.75f, 0.3f);
+		} else {
+			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 1.0f, 1.0f);
 		}
 
-		gfx_draw_image(entries[i]->image, px, 50);
-		px += 350;
+		py += 75;
 	}
 }
 
@@ -46,12 +47,12 @@ static void on_button(int button)
 			running = 0;
 			break;
 
-		case BTN_DPAD_LEFT:
+		case BTN_DPAD_UP:
 			if (active > 0) active--;
 			window_redraw();
 			break;
 
-		case BTN_DPAD_RIGHT:
+		case BTN_DPAD_DOWN:
 			if (active < entries_count - 1) active++;
 			window_redraw();
 			break;
@@ -95,10 +96,6 @@ int main(int argc, char *argv[])
 	window_init(on_draw, gfx_resize, on_key);
 	gamepad_init(GAMEPAD_GRABBED, on_button);
 	gfx_init();
-
-	for (int i = 0; i < entries_count; i++) {
-		entries[i]->image = gfx_image_load(entries[i]->filename);
-	}
 
 	enum {
 		WINDOW,

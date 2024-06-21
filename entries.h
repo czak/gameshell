@@ -2,8 +2,6 @@
 
 struct entry {
 	char *name;
-	char *filename;
-	int image;
 };
 
 extern struct entry **entries;

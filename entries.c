@@ -70,7 +70,7 @@ void entries_load()
 		if (!line) break;
 
 		struct entry *entry = calloc(1, sizeof(struct entry));
-		entry->filename = line;
+		entry->name = line;
 
 		append(entry);
 	}
