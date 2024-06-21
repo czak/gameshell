@@ -31,7 +31,7 @@ executable(
   'entries.c',
   'log.c',
   'gamepad.c',
-  'fonts/chakra_petch_80.c',
+  'fonts/chakra_petch_80_msdf.c',
   shaders,
   dependencies: [
     math,

@@ -68,7 +68,7 @@ void gfx_init()
 	glUseProgram(program);
 
 	// Load font texture
-	texture_font = texture_init(GL_ALPHA, 512, 512, font.texture);
+	texture_font = texture_init(GL_RGB, 512, 512, font.texture);
 
 	// Prepare to draw quads with texture coords
 	glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
@@ -103,10 +103,22 @@ void gfx_draw_text(const char *msg, int px, int py, float r, float g, float b)
 
 		struct glyph *g = &font.glyphs[index];
 
-		vertices[0] = (struct vertex){ g->pl, g->pt, g->tl, g->tt };
-		vertices[1] = (struct vertex){ g->pl, g->pb, g->tl, g->tb };
-		vertices[2] = (struct vertex){ g->pr, g->pt, g->tr, g->tt };
-		vertices[3] = (struct vertex){ g->pr, g->pb, g->tr, g->tb };
+		vertices[0] = (struct vertex){
+			g->xoffset,            g->yoffset,
+			g->x,                  g->y
+		};
+		vertices[1] = (struct vertex){
+			g->xoffset,            g->yoffset + g->height,
+			g->x,                  g->y + g->height
+		};
+		vertices[2] = (struct vertex){
+			g->xoffset + g->width, g->yoffset,
+			g->x + g->width,       g->y
+		};
+		vertices[3] = (struct vertex){
+			g->xoffset + g->width, g->yoffset + g->height,
+			g->x + g->width,       g->y + g->height
+		};
 
 		glUniform2f(uniforms.offset, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

@@ -1,8 +1,8 @@
 struct font {
 	struct glyph {
-		short pl, pt, pr, pb;
-		short tl, tt, tr, tb;
+		short x, y, width, height;
+		short xoffset, yoffset;
 		short xadvance;
 	} glyphs[95]; // ASCII 32-126
-	unsigned char texture[512*512];
+	unsigned char texture[512*512*3];
 };
