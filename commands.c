@@ -112,7 +112,23 @@ void commands_load()
 	fclose(f);
 }
 
-void command_trigger(struct command *cmd)
+void command_trigger(struct command *command)
 {
-	LOG("trigger: %s, %s, %s", cmd->name, cmd->wdir, cmd->path);
+	pid_t pid = fork();
+
+	if (pid > 0) {
+		command->pid = pid;
+    } else if (pid == 0) {
+		setpgid(0, 0);
+		if (command->wdir) {
+			chdir(command->wdir);
+		}
+        execvp(command->path, command->args);
+
+		// exec only returns if an error occured
+        LOG("Exec in child %d failed", getpid());
+		exit(EXIT_FAILURE);
+    } else {
+        LOG("Fork failed");
+	}
 }
