@@ -16,13 +16,16 @@ static void on_draw()
 	int py = 50;
 	for (int i = 0; i < entries_count; i++) {
 		if (i == active) {
-			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 0.75f, 0.3f);
+			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 1.0f, 0.75f, 0.3f);
 		} else {
-			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 1.0f, 1.0f);
+			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 1.0f, 1.0f, 1.0f);
 		}
 
 		py += 75;
 	}
+
+	gfx_draw_text("hello from the command line", 800, 50, 0.5f, 1.0f, 1.0f, 1.0f);
+	gfx_draw_text("big text here", 50, 800, 5.5f, 1.0f, 1.0f, 1.0f);
 }
 
 static void on_button(int button)

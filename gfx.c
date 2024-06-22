@@ -19,8 +19,10 @@ static struct vertex {
 
 static struct {
 	GLint offset;
+	GLint screen_offset;
 	GLint viewport;
 	GLint color;
+	GLint scale;
 } uniforms;
 
 static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const void *pixels)
@@ -62,8 +64,10 @@ void gfx_init()
 	assert(success);
 
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
+	uniforms.screen_offset = glGetUniformLocation(program, "u_ScreenOffset");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
 	uniforms.color = glGetUniformLocation(program, "u_Color");
+	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 
 	glUseProgram(program);
 
@@ -93,11 +97,14 @@ void gfx_resize(int width, int height)
 	glUniform2f(uniforms.viewport, 2.0f / width, 2.0f / height);
 }
 
-void gfx_draw_text(const char *msg, int px, int py, float r, float g, float b)
+void gfx_draw_text(const char *msg, int x, int y, float scale, float r, float g, float b)
 {
 	glBindTexture(GL_TEXTURE_2D, texture_font);
 	glUniform3f(uniforms.color, r, g, b);
+	glUniform2f(uniforms.screen_offset, x, y);
+	glUniform1f(uniforms.scale, scale);
 
+	int px = 0, py = 0;
 	while (*msg != '\0') {
 		int index = *msg - ' ';
 
