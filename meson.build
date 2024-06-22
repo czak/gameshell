@@ -28,7 +28,7 @@ executable(
   'window.c',
   'image.c',
   'gfx.c',
-  'entries.c',
+  'commands.c',
   'log.c',
   'gamepad.c',
   'fonts/chakra_petch_80_msdf.c',

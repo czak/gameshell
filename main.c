@@ -2,7 +2,7 @@
 
 #include "window.h"
 #include "gfx.h"
-#include "entries.h"
+#include "commands.h"
 #include "log.h"
 #include "gamepad.h"
 
@@ -14,11 +14,11 @@ static void on_draw()
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
 	int py = 50;
-	for (int i = 0; i < entries_count; i++) {
+	for (int i = 0; i < commands_count; i++) {
 		if (i == active) {
-			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 1.0f, 0.75f, 0.3f);
+			gfx_draw_text(commands[i]->name, 50, py, 1.0f, 1.0f, 0.75f, 0.3f);
 		} else {
-			gfx_draw_text(entries[i]->name, 50, py, 1.0f, 1.0f, 1.0f, 1.0f);
+			gfx_draw_text(commands[i]->name, 50, py, 1.0f, 1.0f, 1.0f, 1.0f);
 		}
 
 		py += 75;
@@ -56,7 +56,7 @@ static void on_button(int button)
 			break;
 
 		case BTN_DPAD_DOWN:
-			if (active < entries_count - 1) active++;
+			if (active < commands_count - 1) active++;
 			window_redraw();
 			break;
 	}
@@ -73,6 +73,10 @@ static void on_key(int key)
 			window_toggle();
 			break;
 
+		case 28: // Enter
+			command_trigger(commands[active]);
+			break;
+
 		case 57: // Space
 			window_redraw();
 			break;
@@ -83,7 +87,7 @@ static void on_key(int key)
 			break;
 
 		case 108: // Down
-			if (active < entries_count - 1) active++;
+			if (active < commands_count - 1) active++;
 			window_redraw();
 			break;
 
@@ -94,7 +98,7 @@ static void on_key(int key)
 
 int main(int argc, char *argv[])
 {
-	entries_load();
+	commands_load();
 
 	window_init(on_draw, gfx_resize, on_key);
 	gamepad_init(GAMEPAD_GRABBED, on_button);
