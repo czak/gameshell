@@ -18,11 +18,11 @@ static struct vertex {
 } vertices[4];
 
 static struct {
+	GLint position;
 	GLint offset;
-	GLint screen_offset;
+	GLint scale;
 	GLint viewport;
 	GLint color;
-	GLint scale;
 } uniforms;
 
 static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const void *pixels)
@@ -63,11 +63,11 @@ void gfx_init()
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	assert(success);
 
+	uniforms.position = glGetUniformLocation(program, "u_Position");
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
-	uniforms.screen_offset = glGetUniformLocation(program, "u_ScreenOffset");
+	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
 	uniforms.color = glGetUniformLocation(program, "u_Color");
-	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 
 	glUseProgram(program);
 
@@ -101,7 +101,7 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, float r, float g,
 {
 	glBindTexture(GL_TEXTURE_2D, texture_font);
 	glUniform3f(uniforms.color, r, g, b);
-	glUniform2f(uniforms.screen_offset, x, y);
+	glUniform2f(uniforms.offset, x, y);
 	glUniform1f(uniforms.scale, scale);
 
 	int px = 0, py = 0;
@@ -127,7 +127,7 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, float r, float g,
 			g->x + g->width,       g->y + g->height
 		};
 
-		glUniform2f(uniforms.offset, px, py);
+		glUniform2f(uniforms.position, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		px += g->xadvance;
