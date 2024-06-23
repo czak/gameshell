@@ -7,7 +7,7 @@
 #include "gamepad.h"
 
 static int running = 1;
-static int active = 0;
+static int selected = 0;
 
 static void on_draw()
 {
@@ -15,7 +15,7 @@ static void on_draw()
 
 	int py = 50;
 	for (int i = 0; i < commands_count; i++) {
-		if (i == active) {
+		if (i == selected) {
 			gfx_draw_text(commands[i]->name, 50, py, 1.0f, 1.0f, 0.75f, 0.3f);
 		} else {
 			gfx_draw_text(commands[i]->name, 50, py, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -51,12 +51,12 @@ static void on_button(int button)
 			break;
 
 		case BTN_DPAD_UP:
-			if (active > 0) active--;
+			if (selected > 0) selected--;
 			window_redraw();
 			break;
 
 		case BTN_DPAD_DOWN:
-			if (active < commands_count - 1) active++;
+			if (selected < commands_count - 1) selected++;
 			window_redraw();
 			break;
 	}
@@ -74,16 +74,16 @@ static void on_key(int key)
 			break;
 
 		case 28: // Enter
-			command_trigger(commands[active]);
+			command_trigger(commands[selected]);
 			break;
 
 		case 103: // Up
-			if (active > 0) active--;
+			if (selected > 0) selected--;
 			window_redraw();
 			break;
 
 		case 108: // Down
-			if (active < commands_count - 1) active++;
+			if (selected < commands_count - 1) selected++;
 			window_redraw();
 			break;
 
