@@ -77,10 +77,6 @@ static void on_key(int key)
 			command_trigger(commands[active]);
 			break;
 
-		case 57: // Space
-			window_redraw();
-			break;
-
 		case 103: // Up
 			if (active > 0) active--;
 			window_redraw();
