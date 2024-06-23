@@ -1,4 +1,5 @@
 #include <poll.h>
+#include <signal.h>
 
 #include "window.h"
 #include "gfx.h"
@@ -22,7 +23,7 @@ struct menu {
 	int selected;
 	struct menu_item {
 		char *name;
-		void (*action)(void *data, void *param);
+		void (*action)(void *data);
 		void *data;
 	} items[10];
 	int items_count;
@@ -31,6 +32,15 @@ struct menu {
 struct menu commands_menu = {};
 struct menu actions_menu = {};
 struct menu *current_menu = &commands_menu;
+
+static struct command *selected_command()
+{
+	if (commands_menu.selected < 0) {
+		return NULL;
+	}
+
+	return commands_menu.items[commands_menu.selected].data;
+}
 
 void menu_select(struct menu *menu)
 {
@@ -42,10 +52,8 @@ void menu_deselect(struct menu *menu)
 	menu->selected = -1;
 }
 
-static void on_command(void *data, void *param)
+static void on_command(void *data)
 {
-	LOG("command, %p, %p", data, param);
-
 	struct command *command = data;
 	command_trigger(command);
 
@@ -55,11 +63,10 @@ static void on_command(void *data, void *param)
 	window_redraw();
 }
 
-static void on_terminate(void *data, void *param)
+static void on_terminate()
 {
-	LOG("terminate, %p, %p", param);
-
-	// TODO: term the program
+	kill(selected_command()->pid, SIGCONT);
+	kill(selected_command()->pid, SIGTERM);
 
 	menu_deselect(&commands_menu);
 	current_menu = &commands_menu;
@@ -67,14 +74,14 @@ static void on_terminate(void *data, void *param)
 	window_redraw();
 }
 
-static void on_stop(void *data, void *param)
+static void on_stop()
 {
-	LOG("stop, %p, %p", param);
+	kill(-selected_command()->pid, SIGSTOP);
 }
 
-static void on_continue(void *data, void *param)
+static void on_continue()
 {
-	LOG("continue, %p, %p", param);
+	kill(-selected_command()->pid, SIGCONT);
 }
 
 void menu_hover_next_item(struct menu *menu)
@@ -87,11 +94,11 @@ void menu_hover_prev_item(struct menu *menu)
 	if (menu->hover > 0) menu->hover--;
 }
 
-void menu_trigger_item(struct menu *menu, void *param)
+void menu_trigger_item(struct menu *menu)
 {
 	struct menu_item *hover_menu_item = &menu->items[menu->hover];
 	if (hover_menu_item->action) {
-		hover_menu_item->action(hover_menu_item->data, param);
+		hover_menu_item->action(hover_menu_item->data);
 	}
 }
 
@@ -173,7 +180,7 @@ static void on_key(int key)
 			break;
 
 		case 28: // Enter
-			menu_trigger_item(current_menu, (void *) 0);
+			menu_trigger_item(current_menu);
 			window_redraw();
 			break;
 
