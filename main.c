@@ -46,7 +46,8 @@ static void on_command(void *data, void *param)
 {
 	LOG("command, %p, %p", data, param);
 
-	// TODO: exec the program
+	struct command *command = data;
+	command_trigger(command);
 
 	menu_select(&commands_menu);
 	current_menu = &actions_menu;
@@ -69,6 +70,11 @@ static void on_terminate(void *data, void *param)
 static void on_stop(void *data, void *param)
 {
 	LOG("stop, %p, %p", param);
+}
+
+static void on_continue(void *data, void *param)
+{
+	LOG("continue, %p, %p", param);
 }
 
 void menu_hover_next_item(struct menu *menu)
@@ -211,7 +217,9 @@ int main(int argc, char *argv[])
 	actions_menu.items[0].action = on_terminate;
 	actions_menu.items[1].name = "Stop";
 	actions_menu.items[1].action = on_stop;
-	actions_menu.items_count = 2;
+	actions_menu.items[2].name = "Continue";
+	actions_menu.items[2].action = on_continue;
+	actions_menu.items_count = 3;
 
 	enum {
 		WINDOW,
