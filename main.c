@@ -6,6 +6,7 @@
 #include "commands.h"
 #include "log.h"
 #include "gamepad.h"
+#include "menu.h"
 
 static int running = 1;
 
@@ -18,17 +19,6 @@ const struct color hover_color = {1.0f, 0.75f, 0.3f};
 const struct color default_color = {1.0f, 1.0f, 1.0f};
 const struct color dim_color = {0.8f, 0.8f, 0.8f};
 
-struct menu {
-	int hover;
-	int selected;
-	struct menu_item {
-		char *name;
-		void (*action)(void *data);
-		void *data;
-	} items[10];
-	int items_count;
-};
-
 struct menu commands_menu = {};
 struct menu actions_menu = {};
 struct menu *current_menu = &commands_menu;
@@ -40,16 +30,6 @@ static struct command *selected_command()
 	}
 
 	return commands_menu.items[commands_menu.selected].data;
-}
-
-void menu_select(struct menu *menu)
-{
-	menu->selected = menu->hover;
-}
-
-void menu_deselect(struct menu *menu)
-{
-	menu->selected = -1;
 }
 
 static void on_command(void *data)
