@@ -194,18 +194,17 @@ int main(int argc, char *argv[])
 	// gamepad_init(GAMEPAD_GRABBED, on_button);
 	gfx_init();
 
-	// build commands menu from commands
+	// Build commands menu from commands
 	commands_menu.hover = 0;
 	commands_menu.selected = -1;
-	commands_menu.items[0].name = commands[0]->name;
-	commands_menu.items[0].action = on_command;
-	commands_menu.items[0].data = commands[0];
-	commands_menu.items[1].name = commands[1]->name;
-	commands_menu.items[1].action = on_command;
-	commands_menu.items[1].data = commands[1];
-	commands_menu.items_count = 2;
+	for (int i = 0; i < commands_count; i++) {
+		commands_menu.items[i].name = commands[i]->name;
+		commands_menu.items[i].action = on_command;
+		commands_menu.items[i].data = commands[i];
+	}
+	commands_menu.items_count = commands_count;
 
-	// build actions menu
+	// Build actions menu
 	actions_menu.hover = 0;
 	actions_menu.selected = -1;
 	actions_menu.items[0].name = "Terminate";
