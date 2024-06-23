@@ -8,18 +8,40 @@
 
 static int running = 1;
 static int selected = 0;
+static int active = -1;
+
+struct color {
+	float r, g, b;
+};
+
+const struct color active_color = {0.4f, 1.0f, 0.5f};
+const struct color selected_color = {1.0f, 0.75f, 0.3f};
+const struct color default_color = {1.0f, 1.0f, 1.0f};
+const struct color dim_color = {0.8f, 0.8f, 0.8f};
 
 static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
 	int py = 50;
+	struct color c;
+
 	for (int i = 0; i < commands_count; i++) {
-		if (i == selected) {
-			gfx_draw_text(commands[i]->name, 50, py, 1.0f, 1.0f, 0.75f, 0.3f);
-		} else {
-			gfx_draw_text(commands[i]->name, 50, py, 1.0f, 1.0f, 1.0f, 1.0f);
+		if (i == active) {
+			c = active_color;
 		}
+		else if (i == selected) {
+			c = selected_color;
+		}
+		else {
+			if (active >= 0) {
+				c = dim_color;
+			} else {
+				c = default_color;
+			}
+		}
+
+		gfx_draw_text(commands[i]->name, 50, py, 1.0f, c.r, c.g, c.b);
 
 		py += 75;
 	}
@@ -75,6 +97,8 @@ static void on_key(int key)
 
 		case 28: // Enter
 			command_trigger(commands[selected]);
+			active = selected;
+			window_redraw();
 			break;
 
 		case 103: // Up
