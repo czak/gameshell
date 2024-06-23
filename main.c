@@ -91,10 +91,6 @@ static void on_key(int key)
 			running = 0;
 			break;
 
-		case 15: // Tab
-			window_toggle();
-			break;
-
 		case 28: // Enter
 			command_trigger(commands[selected]);
 			active = selected;
