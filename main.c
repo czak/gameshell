@@ -160,6 +160,11 @@ static void on_button(int button)
 			running = 0;
 			break;
 
+		case BTN_SOUTH:
+			menu_trigger_item(current_menu);
+			window_redraw();
+			break;
+
 		case BTN_DPAD_UP:
 			menu_hover_prev_item(current_menu);
 			window_redraw();
