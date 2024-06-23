@@ -162,9 +162,9 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 			ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM +
 			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 	zwlr_layer_surface_v1_set_exclusive_zone(window.zwlr_layer_surface_v1, -1);
-	// zwlr_layer_surface_v1_set_keyboard_interactivity(
-	// 		window.zwlr_layer_surface_v1,
-	// 		ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
+	zwlr_layer_surface_v1_set_keyboard_interactivity(
+			window.zwlr_layer_surface_v1,
+			ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
 	wl_surface_commit(window.wl_surface);
 
 	struct wl_keyboard *wl_keyboard = wl_seat_get_keyboard(globals.wl_seat);

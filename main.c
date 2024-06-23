@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 	commands_load();
 
 	window_init(on_draw, gfx_resize, on_key);
-	gamepad_init(GAMEPAD_GRABBED, on_button);
+	// gamepad_init(GAMEPAD_GRABBED, on_button);
 	gfx_init();
 
 	enum {
