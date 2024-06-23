@@ -7,47 +7,122 @@
 #include "gamepad.h"
 
 static int running = 1;
-static int selected = 0;
-static int active = -1;
 
 struct color {
 	float r, g, b;
 };
 
-const struct color active_color = {0.4f, 1.0f, 0.5f};
-const struct color selected_color = {1.0f, 0.75f, 0.3f};
+const struct color selected_color = {0.4f, 1.0f, 0.5f};
+const struct color hover_color = {1.0f, 0.75f, 0.3f};
 const struct color default_color = {1.0f, 1.0f, 1.0f};
 const struct color dim_color = {0.8f, 0.8f, 0.8f};
 
-static void on_draw()
+struct menu {
+	int hover;
+	int selected;
+	struct menu_item {
+		char *name;
+		void (*action)(void *data, void *param);
+		void *data;
+	} items[10];
+	int items_count;
+};
+
+struct menu commands_menu = {};
+struct menu actions_menu = {};
+struct menu *current_menu = &commands_menu;
+
+void menu_select(struct menu *menu)
 {
-	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
+	menu->selected = menu->hover;
+}
 
-	int py = 50;
+void menu_deselect(struct menu *menu)
+{
+	menu->selected = -1;
+}
+
+static void on_command(void *data, void *param)
+{
+	LOG("command, %p, %p", data, param);
+
+	// TODO: exec the program
+
+	menu_select(&commands_menu);
+	current_menu = &actions_menu;
+
+	window_redraw();
+}
+
+static void on_terminate(void *data, void *param)
+{
+	LOG("terminate, %p, %p", param);
+
+	// TODO: term the program
+
+	menu_deselect(&commands_menu);
+	current_menu = &commands_menu;
+
+	window_redraw();
+}
+
+static void on_stop(void *data, void *param)
+{
+	LOG("stop, %p, %p", param);
+}
+
+void menu_hover_next_item(struct menu *menu)
+{
+	if (menu->hover < menu->items_count - 1) menu->hover++;
+}
+
+void menu_hover_prev_item(struct menu *menu)
+{
+	if (menu->hover > 0) menu->hover--;
+}
+
+void menu_trigger_item(struct menu *menu, void *param)
+{
+	struct menu_item *hover_menu_item = &menu->items[menu->hover];
+	if (hover_menu_item->action) {
+		hover_menu_item->action(hover_menu_item->data, param);
+	}
+}
+
+static void draw_menu(struct menu *menu, int px, int py)
+{
 	struct color c;
-
-	for (int i = 0; i < commands_count; i++) {
-		if (i == active) {
-			c = active_color;
-		}
-		else if (i == selected) {
+	
+	for (int i = 0; i < menu->items_count; i++) {
+		if (i == menu->selected) {
 			c = selected_color;
 		}
+		else if (i == menu->hover) {
+			c = hover_color;
+		}
 		else {
-			if (active >= 0) {
+			if (menu->selected >= 0) {
 				c = dim_color;
 			} else {
 				c = default_color;
 			}
 		}
 
-		gfx_draw_text(commands[i]->name, 50, py, 1.0f, c.r, c.g, c.b);
+		gfx_draw_text(menu->items[i].name, px, py, 1.0f, c.r, c.g, c.b);
 
 		py += 75;
 	}
+}
 
-	gfx_draw_text("hello from the command line", 800, 50, 0.5f, 1.0f, 1.0f, 1.0f);
-	gfx_draw_text("big text here", 50, 800, 5.5f, 1.0f, 1.0f, 1.0f);
+static void on_draw()
+{
+	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
+
+	draw_menu(&commands_menu, 50, 50);
+
+	if (commands_menu.selected >= 0) {
+		draw_menu(&actions_menu, 800, 50);
+	}
 }
 
 static void on_button(int button)
@@ -73,12 +148,12 @@ static void on_button(int button)
 			break;
 
 		case BTN_DPAD_UP:
-			if (selected > 0) selected--;
+			menu_hover_prev_item(current_menu);
 			window_redraw();
 			break;
 
 		case BTN_DPAD_DOWN:
-			if (selected < commands_count - 1) selected++;
+			menu_hover_next_item(current_menu);
 			window_redraw();
 			break;
 	}
@@ -92,18 +167,17 @@ static void on_key(int key)
 			break;
 
 		case 28: // Enter
-			command_trigger(commands[selected]);
-			active = selected;
+			menu_trigger_item(current_menu, (void *) 0);
 			window_redraw();
 			break;
 
 		case 103: // Up
-			if (selected > 0) selected--;
+			menu_hover_prev_item(current_menu);
 			window_redraw();
 			break;
 
 		case 108: // Down
-			if (selected < commands_count - 1) selected++;
+			menu_hover_next_item(current_menu);
 			window_redraw();
 			break;
 
@@ -119,6 +193,26 @@ int main(int argc, char *argv[])
 	window_init(on_draw, gfx_resize, on_key);
 	// gamepad_init(GAMEPAD_GRABBED, on_button);
 	gfx_init();
+
+	// build commands menu from commands
+	commands_menu.hover = 0;
+	commands_menu.selected = -1;
+	commands_menu.items[0].name = commands[0]->name;
+	commands_menu.items[0].action = on_command;
+	commands_menu.items[0].data = commands[0];
+	commands_menu.items[1].name = commands[1]->name;
+	commands_menu.items[1].action = on_command;
+	commands_menu.items[1].data = commands[1];
+	commands_menu.items_count = 2;
+
+	// build actions menu
+	actions_menu.hover = 0;
+	actions_menu.selected = -1;
+	actions_menu.items[0].name = "Terminate";
+	actions_menu.items[0].action = on_terminate;
+	actions_menu.items[1].name = "Stop";
+	actions_menu.items[1].action = on_stop;
+	actions_menu.items_count = 2;
 
 	enum {
 		WINDOW,
