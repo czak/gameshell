@@ -59,15 +59,31 @@ static int is_gamepad(char *line)
 	return parse_digit(words[w][n]) & (1 << (BTN_GAMEPAD % 4));
 }
 
+static void parse_name(char *dst, char *src, int size)
+{
+	char *start = strchr(src, '"');
+	if (!start) return;
+
+	char *end = strrchr(src, '"');
+	if (!end) return;
+
+	size_t len = end - start - 1;
+	if (len > size - 1) len = size - 1;
+
+	strncpy(dst, start + 1, len);
+	dst[len] = '\0';
+}
+
 static int gamepad_open()
 {
 	FILE *f = fopen("/proc/bus/input/devices", "r");
-	char buf[256];
+	char buf[256], name[64];
 	int id = -1, fd = -1;
 
 	while (fgets(buf, sizeof(buf), f)) {
 		if (strstr(buf, "N: Name=")) {
 			id = -1;
+			parse_name(name, buf, sizeof(name));
 		} else if (strstr(buf, "H: Handlers=")) {
 			id = parse_handlers(buf);
 		} else if (id != -1 && strstr(buf, "B: KEY=")) {
@@ -76,7 +92,7 @@ static int gamepad_open()
 
 				fd = open(buf, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 				if (fd >= 0) {
-					LOG("Found gamepad at %s", buf);
+					LOG("Found %s at %s", name, buf);
 					break;
 				}
 			}
