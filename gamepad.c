@@ -75,7 +75,10 @@ static int gamepad_open()
 				snprintf(buf, sizeof(buf), "/dev/input/event%d", id);
 
 				fd = open(buf, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-				if (fd >= 0) break;
+				if (fd >= 0) {
+					LOG("Found gamepad at %s", buf);
+					break;
+				}
 			}
 		}
 	}
