@@ -127,7 +127,8 @@ void gamepad_dispatch()
 		return;
 	}
 
-	// Try to read gamepad
+	if (gamepad.gfd < 0) return;
+
 	struct input_event ev;
 	n = read(gamepad.gfd, &ev, sizeof(ev));
 
