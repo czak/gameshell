@@ -90,7 +90,7 @@ static int gamepad_open()
 void gamepad_init(int grab, void (*on_button)(int button))
 {
 	gamepad.ifd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
-	inotify_add_watch(gamepad.ifd, "/dev/input", IN_CREATE);
+	inotify_add_watch(gamepad.ifd, "/dev/input", IN_CREATE | IN_ATTRIB);
 
 	gamepad.gfd = gamepad_open();
 	if (grab) gamepad_grab();
