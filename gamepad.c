@@ -18,12 +18,16 @@ static struct {
 	void (*on_button)(int button);
 } gamepad;
 
+/**
+ * Find "event%d" in the given string and return the number.
+ * Return -1 if string does not contain "event";
+ */
 static int parse_handlers(char *line)
 {
 	char *event = strstr(line, "event");
 	if (!event) return -1;
 
-	int n;
+	int n = -1;
 	sscanf(event, "event%d", &n);
 	return n;
 }
@@ -36,6 +40,25 @@ static int parse_handlers(char *line)
 static int parse_digit(char c)
 {
 	return c >= 'a' ? c - 87 : c - 48;
+}
+
+/**
+ * Copy a double-quoted string from src to dst, up to size.
+ * Adds a terminating '\0', so actual string will be up to size - 1.
+ */
+static void parse_name(char *dst, char *src, int size)
+{
+	char *start = strchr(src, '"');
+	if (!start) return;
+
+	char *end = strrchr(src, '"');
+	if (!end) return;
+
+	size_t len = end - start - 1;
+	if (len > size - 1) len = size - 1;
+
+	strncpy(dst, start + 1, len);
+	dst[len] = '\0';
 }
 
 static int is_gamepad(char *line)
@@ -57,21 +80,6 @@ static int is_gamepad(char *line)
 	if (n < 0) return 0;
 
 	return parse_digit(words[w][n]) & (1 << (BTN_GAMEPAD % 4));
-}
-
-static void parse_name(char *dst, char *src, int size)
-{
-	char *start = strchr(src, '"');
-	if (!start) return;
-
-	char *end = strrchr(src, '"');
-	if (!end) return;
-
-	size_t len = end - start - 1;
-	if (len > size - 1) len = size - 1;
-
-	strncpy(dst, start + 1, len);
-	dst[len] = '\0';
 }
 
 static int gamepad_open()
