@@ -11,11 +11,6 @@
 #include "gamepad.h"
 #include "log.h"
 
-#define LONG_BITS (sizeof(long) * 8)
-#define NLONGS(x) (((x) + LONG_BITS - 1) / LONG_BITS)
-#define TEST_BIT(nr, array) \
-   ((1UL << ((nr) % LONG_BITS)) & (array)[(nr) / LONG_BITS])
-
 static struct {
 	int ifd;
 	int gfd;
@@ -23,48 +18,69 @@ static struct {
 	void (*on_button)(int button);
 } gamepad;
 
-/// Filter for scandir. We only care about /dev/input/event* devices.
-static int is_event_device(const struct dirent *dir) {
-	return strncmp("event", dir->d_name, 5) == 0;
+static int parse_handlers(char *line)
+{
+	char *event = strstr(line, "event");
+	if (!event) return -1;
+
+	int n;
+	sscanf(event, "event%d", &n);
+	return n;
+}
+
+/**
+ * Convert a single hex digit character to a number
+ *
+ * Input must be one of 0123456789abcdef.
+ */
+static int parse_digit(char c)
+{
+	return c >= 'a' ? c - 87 : c - 48;
+}
+
+static int is_gamepad(char *line)
+{
+	char *words[12] = {0};
+	int num_words = 0;
+
+	// Read in all the words, starting right after "B: KEY="
+	for (char *word = strtok(line + 7, " \n"); word != NULL; word = strtok(NULL, " \n")) {
+		words[num_words++] = word;
+	}
+
+	// Which word contains the BTN_GAMEPAD bit
+	int w = num_words - BTN_GAMEPAD / 64 - 1;
+	if (w < 0) return 0;
+
+	// Which nibble in the word contains the BTN_GAMEPAD bit
+	int n = strnlen(words[w], 16) - (BTN_GAMEPAD % 64) / 4 - 1;
+	if (n < 0) return 0;
+
+	return parse_digit(words[w][n]) & (1 << (BTN_GAMEPAD % 4));
 }
 
 static int gamepad_open()
 {
-	int fd = -1;
+	FILE *f = fopen("/proc/bus/input/devices", "r");
+	char buf[256];
+	int id = -1, fd = -1;
 
-	struct dirent **namelist;
-	int num_devices = scandir("/dev/input", &namelist, is_event_device, alphasort);
-	if (num_devices < 0) {
-		perror("scandir");
-		return -1;
-	}
+	while (fgets(buf, sizeof(buf), f)) {
+		if (strstr(buf, "N: Name=")) {
+			id = -1;
+		} else if (strstr(buf, "H: Handlers=")) {
+			id = parse_handlers(buf);
+		} else if (id != -1 && strstr(buf, "B: KEY=")) {
+			if (is_gamepad(buf)) {
+				snprintf(buf, sizeof(buf), "/dev/input/event%d", id);
 
-	for (int i = 0; i < num_devices; i++) {
-		char path[300];
-		snprintf(path, sizeof(path), "/dev/input/%s", namelist[i]->d_name);
-
-		int current_fd = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-		if (current_fd < 0) continue;
-
-		unsigned long key_bits[NLONGS(KEY_CNT)] = {0};
-		if (ioctl(current_fd, EVIOCGBIT(EV_KEY, sizeof(key_bits)), key_bits) < 0) {
-			perror("EVIOCGBIT");
+				fd = open(buf, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+				if (fd >= 0) break;
+			}
 		}
-
-		if (TEST_BIT(BTN_GAMEPAD, key_bits)) {
-			fd = current_fd;
-			break;
-		}
-
-		close(current_fd);
 	}
 
-	for (int i = 0; i < num_devices; i++) {
-		free(namelist[i]);
-	}
-
-	free(namelist);
-
+	fclose(f);
 	return fd;
 }
 
