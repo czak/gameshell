@@ -16,4 +16,4 @@ extern struct command **commands;
 extern int commands_count;
 
 void commands_load();
-void command_trigger(struct command *cmd);
+void command_exec(struct command *cmd);

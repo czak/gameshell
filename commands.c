@@ -112,7 +112,7 @@ void commands_load()
 	fclose(f);
 }
 
-void command_trigger(struct command *command)
+void command_exec(struct command *command)
 {
 	pid_t pid = fork();
 

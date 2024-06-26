@@ -35,7 +35,7 @@ static struct command *selected_command()
 static void on_command(void *data)
 {
 	struct command *command = data;
-	command_trigger(command);
+	command_exec(command);
 
 	menu_select(&commands_menu);
 	current_menu = &actions_menu;
