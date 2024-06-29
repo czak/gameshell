@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <poll.h>
 #include <signal.h>
 
@@ -7,6 +8,7 @@
 #include "log.h"
 #include "gamepad.h"
 #include "menu.h"
+#include "signals.h"
 
 static int running = 1;
 
@@ -47,11 +49,6 @@ static void on_terminate()
 {
 	kill(selected_command()->pid, SIGCONT);
 	kill(selected_command()->pid, SIGTERM);
-
-	menu_deselect(&commands_menu);
-	current_menu = &commands_menu;
-
-	window_redraw();
 }
 
 static void on_stop()
@@ -166,12 +163,39 @@ static void on_key(int key)
 	}
 }
 
+static void on_child(uint32_t child_pid, int32_t code)
+{
+	assert(child_pid == selected_command()->pid);
+
+	switch (code) {
+	case CLD_EXITED:
+	case CLD_KILLED:
+	case CLD_DUMPED:
+		LOG("Child %d exited (%d)", child_pid, code);
+		menu_deselect(&commands_menu);
+		current_menu = &commands_menu;
+		break;
+
+	case CLD_STOPPED:
+		LOG("Child %d stopped", child_pid);
+		break;
+
+	case CLD_CONTINUED:
+		LOG("Child %d continued", child_pid);
+		break;
+	}
+
+	window_redraw();
+}
+
 int main(int argc, char *argv[])
 {
 	commands_load();
 
 	window_init(on_draw, gfx_resize, on_key);
 	gamepad_init(GAMEPAD_GRABBED, on_button);
+	signals_init(on_child);
+
 	gfx_init();
 
 	// Build commands menu from commands
@@ -199,6 +223,7 @@ int main(int argc, char *argv[])
 		WINDOW,
 		GAMEPAD_INOTIFY,
 		GAMEPAD_EVENT,
+		SIGNALS,
 	};
 
 	while (running) {
@@ -208,6 +233,7 @@ int main(int argc, char *argv[])
 			[WINDOW] = { .fd = window_get_fd(), .events = POLLIN },
 			[GAMEPAD_INOTIFY] = { .fd = gamepad_get_inotify(), .events = POLLIN },
 			[GAMEPAD_EVENT] = { .fd = gamepad_get_fd(), .events = POLLIN },
+			[SIGNALS] = { .fd = signals_get_fd(), .events = POLLIN },
 		};
 
 		poll(pollfds, sizeof(pollfds) / sizeof(pollfds[0]), -1);
@@ -218,6 +244,10 @@ int main(int argc, char *argv[])
 
 		if (pollfds[GAMEPAD_INOTIFY].revents || pollfds[GAMEPAD_EVENT].revents) {
 			gamepad_dispatch();
+		}
+
+		if (pollfds[SIGNALS].revents) {
+			signals_dispatch();
 		}
 	}
 }
