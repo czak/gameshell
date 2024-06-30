@@ -35,15 +35,15 @@ glyphs = json["glyphs"].map do |g|
 
   <<~TEXT.gsub(/\n+/, ' ').squeeze(' ').strip
     {
-      .pl = #{p["left"].to_s("F")},
-      .pb = #{p["bottom"].to_s("F")},
-      .pr = #{p["right"].to_s("F")},
-      .pt = #{p["top"].to_s("F")},
-      .tl = #{t["left"].to_s("F")},
-      .tb = #{t["bottom"].to_s("F")},
-      .tr = #{t["right"].to_s("F")},
-      .tt = #{t["top"].to_s("F")},
-      .advance = #{adv.to_s("F")}
+      .pl = #{BigDecimal(p["left"]).to_s("F")},
+      .pb = #{BigDecimal(p["bottom"]).to_s("F")},
+      .pr = #{BigDecimal(p["right"]).to_s("F")},
+      .pt = #{BigDecimal(p["top"]).to_s("F")},
+      .tl = #{BigDecimal(t["left"]).to_s("F")},
+      .tb = #{BigDecimal(t["bottom"]).to_s("F")},
+      .tr = #{BigDecimal(t["right"]).to_s("F")},
+      .tt = #{BigDecimal(t["top"]).to_s("F")},
+      .advance = #{BigDecimal(adv).to_s("F")}
     },
   TEXT
 end
