@@ -22,5 +22,5 @@ void main()
   sigDist *= u_Scale * FONT_PXRANGE / FONT_SIZE;
 
   float alpha = clamp(sigDist + 0.5, 0.0, 1.0);
-  gl_FragColor = u_Color * alpha;
+  gl_FragColor = vec4(u_Color.rgb, u_Color.a * alpha);
 }
