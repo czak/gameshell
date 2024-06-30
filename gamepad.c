@@ -163,6 +163,26 @@ static void dispatch_ifd()
 	}
 }
 
+int translate_event(struct input_event *ev)
+{
+	if (ev->type == EV_KEY && ev->value == 1) return ev->code;
+
+	// Translate "analog" dpad to digital
+	// See https://www.kernel.org/doc/html/latest/input/gamepad.html
+	if (ev->type == EV_ABS && ev->value != 0) {
+		if (ev->code == ABS_HAT0X) {
+			if (ev->value == -1) return BTN_DPAD_LEFT;
+			if (ev->value == 1) return BTN_DPAD_RIGHT;
+		}
+		else if (ev->code == ABS_HAT0Y) {
+			if (ev->value == -1) return BTN_DPAD_UP;
+			if (ev->value == 1) return BTN_DPAD_DOWN;
+		}
+	}
+
+	return -1;
+}
+
 static void dispatch_gfd()
 {
 	struct input_event ev;
@@ -170,19 +190,9 @@ static void dispatch_gfd()
 
 	if (n > 0) {
 		if (gamepad.on_button) {
-			if (ev.type == EV_KEY && ev.value == 1)
-				gamepad.on_button(ev.code);
-
-			// Translate "analog" dpad to digital
-			// See https://www.kernel.org/doc/html/latest/input/gamepad.html
-			if (ev.type == EV_ABS && ev.value != 0) {
-				if (ev.code == ABS_HAT0X) {
-					if (ev.value == -1) gamepad.on_button(BTN_DPAD_LEFT);
-					if (ev.value == 1) gamepad.on_button(BTN_DPAD_RIGHT);
-				} else if (ev.code == ABS_HAT0Y) {
-					if (ev.value == -1) gamepad.on_button(BTN_DPAD_UP);
-					if (ev.value == 1) gamepad.on_button(BTN_DPAD_DOWN);
-				}
+			int code = translate_event(&ev);
+			if (code >= 0) {
+				gamepad.on_button(code);
 			}
 		}
 	}
