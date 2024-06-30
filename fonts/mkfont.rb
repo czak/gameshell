@@ -55,6 +55,8 @@ end
 File.write("#{name}.c", <<~OUT)
 #include "font.h"
 
+
+// mkfont.rb #{font_path} #{name}
 struct font font = {
 	.glyphs = {
 		#{glyphs.join("\n\t\t")}
