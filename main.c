@@ -90,10 +90,10 @@ static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
-	draw_menu(&commands_menu, 50, 50);
+	draw_menu(&commands_menu, 50, 100);
 
 	if (commands_menu.selected >= 0) {
-		draw_menu(&actions_menu, 800, 50);
+		draw_menu(&actions_menu, 500, 100);
 	}
 }
 
