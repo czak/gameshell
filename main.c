@@ -80,7 +80,7 @@ static void draw_menu(struct menu *menu, int px, int py)
 			}
 		}
 
-		gfx_draw_text(menu->items[i].name, px, py, 1.0f, c.r, c.g, c.b);
+		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c.r, c.g, c.b);
 
 		py += 75;
 	}

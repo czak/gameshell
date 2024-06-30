@@ -1,6 +1,7 @@
 precision mediump float;
 
-#define DISTANCE_RANGE 4.0 // value used for msdf-bmfont -r argument
+#define FONT_PXRANGE 2.0
+#define FONT_SIZE 64.0
 
 uniform sampler2D u_Sampler;
 uniform vec3 u_Color;
@@ -18,7 +19,7 @@ void main()
   float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
 
   // see https://github.com/Chlumsky/msdfgen/issues/36#issuecomment-429240110
-  sigDist *= DISTANCE_RANGE * u_Scale;
+  sigDist *= u_Scale * FONT_PXRANGE / FONT_SIZE;
 
   float alpha = clamp(sigDist + 0.5, 0.0, 1.0);
   gl_FragColor = vec4(u_Color.rgb, alpha);

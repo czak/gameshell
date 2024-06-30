@@ -13,8 +13,8 @@ static GLuint program;
 static GLuint texture_font;
 
 static struct vertex {
-	GLshort x, y;
-	GLushort s, t;
+	GLfloat x, y;
+	GLfloat s, t;
 } vertices[4];
 
 static struct {
@@ -75,8 +75,8 @@ void gfx_init()
 	texture_font = texture_init(GL_RGB, 512, 512, font.texture);
 
 	// Prepare to draw quads with texture coords
-	glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
-	glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLshort));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLfloat));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -104,33 +104,21 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, float r, float g,
 	glUniform2f(uniforms.offset, x, y);
 	glUniform1f(uniforms.scale, scale);
 
-	int px = 0, py = 0;
+	float px = 0, py = 0;
 	while (*msg != '\0') {
 		int index = *msg - ' ';
 
 		struct glyph *g = &font.glyphs[index];
 
-		vertices[0] = (struct vertex){
-			g->xoffset,            g->yoffset,
-			g->x,                  g->y
-		};
-		vertices[1] = (struct vertex){
-			g->xoffset,            g->yoffset + g->height,
-			g->x,                  g->y + g->height
-		};
-		vertices[2] = (struct vertex){
-			g->xoffset + g->width, g->yoffset,
-			g->x + g->width,       g->y
-		};
-		vertices[3] = (struct vertex){
-			g->xoffset + g->width, g->yoffset + g->height,
-			g->x + g->width,       g->y + g->height
-		};
+		vertices[0] = (struct vertex){ g->pl, g->pt, g->tl, g->tt };
+		vertices[1] = (struct vertex){ g->pl, g->pb, g->tl, g->tb };
+		vertices[2] = (struct vertex){ g->pr, g->pt, g->tr, g->tt };
+		vertices[3] = (struct vertex){ g->pr, g->pb, g->tr, g->tb };
 
 		glUniform2f(uniforms.position, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		px += g->xadvance;
+		px += g->advance;
 
 		msg++;
 	}

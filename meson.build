@@ -33,7 +33,7 @@ executable(
   'gamepad.c',
   'menu.c',
   'signals.c',
-  'fonts/chakra_petch_80_msdf.c',
+  'fonts/jetbrains.c',
   shaders,
   dependencies: [
     math,
