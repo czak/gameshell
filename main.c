@@ -12,10 +12,6 @@
 
 static int running = 1;
 
-struct color {
-	float r, g, b;
-};
-
 const struct color selected_color = {0.4f, 1.0f, 0.5f};
 const struct color hover_color = {1.0f, 0.75f, 0.3f};
 const struct color default_color = {1.0f, 1.0f, 1.0f};

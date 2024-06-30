@@ -1,3 +1,7 @@
+struct color {
+	float r, g, b;
+};
+
 void gfx_init();
 void gfx_clear(float red, float green, float blue, float alpha);
 void gfx_resize(int width, int height);
