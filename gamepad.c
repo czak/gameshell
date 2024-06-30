@@ -143,7 +143,7 @@ char *gamepad_get_name()
 	}
 }
 
-static void gamepad_dispatch_ifd()
+static void dispatch_ifd()
 {
 	char buf[sizeof(struct inotify_event) + NAME_MAX + 1];
 	int n = read(gamepad.ifd, buf, sizeof(buf));
@@ -163,7 +163,7 @@ static void gamepad_dispatch_ifd()
 	}
 }
 
-static void gamepad_dispatch_gfd()
+static void dispatch_gfd()
 {
 	struct input_event ev;
 	int n = read(gamepad.gfd, &ev, sizeof(ev));
@@ -198,11 +198,11 @@ static void gamepad_dispatch_gfd()
 void gamepad_dispatch()
 {
 	if (gamepad.ifd >= 0) {
-		gamepad_dispatch_ifd();
+		dispatch_ifd();
 	}
 
 	if (gamepad.gfd >= 0) {
-		gamepad_dispatch_gfd();
+		dispatch_gfd();
 	}
 }
 
