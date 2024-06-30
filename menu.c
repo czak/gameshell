@@ -2,12 +2,12 @@
 
 void menu_select(struct menu *menu)
 {
-	menu->selected = menu->hover;
+	menu->selected = 1;
 }
 
 void menu_deselect(struct menu *menu)
 {
-	menu->selected = -1;
+	menu->selected = 0;
 }
 
 void menu_hover_next_item(struct menu *menu)

@@ -15,11 +15,6 @@ static int running = 1;
 static const int virtual_width = 1920;
 static const int virtual_height = 1080;
 
-static const struct color selected_color = {0.4f, 1.0f, 0.5f, 1.0f};
-static const struct color hover_color = {1.0f, 0.75f, 0.3f, 1.0f};
-static const struct color default_color = {1.0f, 1.0f, 1.0f, 1.0f};
-static const struct color dim_color = {1.0f, 1.0f, 1.0f, 0.25f};
-
 static struct menu commands_menu = {};
 static struct menu actions_menu = {};
 
@@ -55,22 +50,22 @@ static void on_continue()
 
 static void draw_menu(struct menu *menu, int px, int py)
 {
-	struct color c;
-	
+	static struct color colors[2][2] = {
+		// Menu not selected
+		{
+			{1.0f, 1.0f, 1.0f, 1.0f},  // not hovered
+			{1.0f, 0.75f, 0.3f, 1.0f}, // hovered
+		},
+
+		// Menu selected
+		{
+			{1.0f, 1.0f, 1.0f, 0.25f}, // not selected
+			{0.4f, 1.0f, 0.5f, 1.0f},  // selected
+		},
+	};
+
 	for (int i = 0; i < menu->items_count; i++) {
-		if (i == menu->selected) {
-			c = selected_color;
-		}
-		else if (i == menu->hover) {
-			c = hover_color;
-		}
-		else {
-			if (menu->selected >= 0) {
-				c = dim_color;
-			} else {
-				c = default_color;
-			}
-		}
+		struct color c = colors[menu->selected][i == menu->hover];
 
 		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c);
 
@@ -84,12 +79,12 @@ static void on_draw()
 
 	draw_menu(&commands_menu, 50, 100);
 
-	if (commands_menu.selected >= 0) {
+	if (active_menu == &actions_menu) {
 		draw_menu(&actions_menu, 500, 100);
 	}
 
 	gfx_draw_text("Gamepad:", 50, 1000, 24.0f, (struct color){0.7f, 0.7f, 0.7f, 1.0f});
-	gfx_draw_text(gamepad_get_name(), 170, 1000, 24.0f, default_color);
+	gfx_draw_text(gamepad_get_name(), 170, 1000, 24.0f, (struct color){1.0f, 1.0f, 1.0f, 1.0f});
 }
 
 static void on_resize(int width, int height)
@@ -205,8 +200,6 @@ int main(int argc, char *argv[])
 	gfx_init();
 
 	// Build commands menu from commands
-	commands_menu.hover = 0;
-	commands_menu.selected = -1;
 	for (int i = 0; i < commands_count; i++) {
 		commands_menu.items[i].name = commands[i]->name;
 		commands_menu.items[i].action = on_command;
@@ -215,8 +208,6 @@ int main(int argc, char *argv[])
 	commands_menu.items_count = commands_count;
 
 	// Build actions menu
-	actions_menu.hover = 0;
-	actions_menu.selected = -1;
 	actions_menu.items[0].name = "Terminate";
 	actions_menu.items[0].action = on_terminate;
 	actions_menu.items[1].name = "Stop";
