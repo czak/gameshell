@@ -19,42 +19,35 @@ const struct color dim_color = {1.0f, 1.0f, 1.0f, 0.25f};
 
 struct menu commands_menu = {};
 struct menu actions_menu = {};
-struct menu *current_menu = &commands_menu;
 
-static struct command *selected_command()
-{
-	if (commands_menu.selected < 0) {
-		return NULL;
-	}
-
-	return commands_menu.items[commands_menu.selected].data;
-}
+struct menu *active_menu = &commands_menu;
+struct command *active_command = NULL;
 
 static void on_command(void *data)
 {
-	struct command *command = data;
-	command_exec(command);
+	active_command = data;
+	command_exec(active_command);
 
 	menu_select(&commands_menu);
-	current_menu = &actions_menu;
+	active_menu = &actions_menu;
 
 	window_redraw();
 }
 
 static void on_terminate()
 {
-	kill(selected_command()->pid, SIGCONT);
-	kill(selected_command()->pid, SIGTERM);
+	kill(active_command->pid, SIGCONT);
+	kill(active_command->pid, SIGTERM);
 }
 
 static void on_stop()
 {
-	kill(-selected_command()->pid, SIGSTOP);
+	kill(active_command->pid, SIGSTOP);
 }
 
 static void on_continue()
 {
-	kill(-selected_command()->pid, SIGCONT);
+	kill(active_command->pid, SIGCONT);
 }
 
 static void draw_menu(struct menu *menu, int px, int py)
@@ -116,17 +109,17 @@ static void on_button(int button)
 			break;
 
 		case BTN_SOUTH:
-			menu_trigger_item(current_menu);
+			menu_trigger_item(active_menu);
 			window_redraw();
 			break;
 
 		case BTN_DPAD_UP:
-			menu_hover_prev_item(current_menu);
+			menu_hover_prev_item(active_menu);
 			window_redraw();
 			break;
 
 		case BTN_DPAD_DOWN:
-			menu_hover_next_item(current_menu);
+			menu_hover_next_item(active_menu);
 			window_redraw();
 			break;
 	}
@@ -140,17 +133,17 @@ static void on_key(int key)
 			break;
 
 		case 28: // Enter
-			menu_trigger_item(current_menu);
+			menu_trigger_item(active_menu);
 			window_redraw();
 			break;
 
 		case 103: // Up
-			menu_hover_prev_item(current_menu);
+			menu_hover_prev_item(active_menu);
 			window_redraw();
 			break;
 
 		case 108: // Down
-			menu_hover_next_item(current_menu);
+			menu_hover_next_item(active_menu);
 			window_redraw();
 			break;
 
@@ -161,7 +154,7 @@ static void on_key(int key)
 
 static void on_child(uint32_t child_pid, int32_t code)
 {
-	assert(child_pid == selected_command()->pid);
+	assert(child_pid == active_command->pid);
 
 	switch (code) {
 	case CLD_EXITED:
@@ -169,7 +162,8 @@ static void on_child(uint32_t child_pid, int32_t code)
 	case CLD_DUMPED:
 		LOG("Child %d exited (%d)", child_pid, code);
 		menu_deselect(&commands_menu);
-		current_menu = &commands_menu;
+		active_menu = &commands_menu;
+		active_command = NULL;
 		break;
 
 	case CLD_STOPPED:
