@@ -143,9 +143,8 @@ char *gamepad_get_name()
 	}
 }
 
-void gamepad_dispatch()
+static void gamepad_dispatch_ifd()
 {
-	// Try to read inotify
 	char buf[sizeof(struct inotify_event) + NAME_MAX + 1];
 	int n = read(gamepad.ifd, buf, sizeof(buf));
 
@@ -162,11 +161,12 @@ void gamepad_dispatch()
 		LOG("Failed to read inotify");
 		return;
 	}
+}
 
-	if (gamepad.gfd < 0) return;
-
+static void gamepad_dispatch_gfd()
+{
 	struct input_event ev;
-	n = read(gamepad.gfd, &ev, sizeof(ev));
+	int n = read(gamepad.gfd, &ev, sizeof(ev));
 
 	if (n > 0) {
 		if (gamepad.on_button) {
@@ -192,6 +192,17 @@ void gamepad_dispatch()
 		gamepad.gfd = gamepad_open();
 		if (gamepad.grabbed) gamepad_grab();
 		if (gamepad.on_gamepad) gamepad.on_gamepad();
+	}
+}
+
+void gamepad_dispatch()
+{
+	if (gamepad.ifd >= 0) {
+		gamepad_dispatch_ifd();
+	}
+
+	if (gamepad.gfd >= 0) {
+		gamepad_dispatch_gfd();
 	}
 }
 
