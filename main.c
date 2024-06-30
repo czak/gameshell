@@ -45,12 +45,12 @@ static void on_terminate()
 
 static void on_stop()
 {
-	kill(active_command->pid, SIGSTOP);
+	kill(-active_command->pid, SIGSTOP);
 }
 
 static void on_continue()
 {
-	kill(active_command->pid, SIGCONT);
+	kill(-active_command->pid, SIGCONT);
 }
 
 static void draw_menu(struct menu *menu, int px, int py)
