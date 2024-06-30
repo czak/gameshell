@@ -87,6 +87,9 @@ static void on_draw()
 	if (commands_menu.selected >= 0) {
 		draw_menu(&actions_menu, 500, 100);
 	}
+
+	gfx_draw_text("Gamepad:", 50, 1000, 24.0f, (struct color){0.7f, 0.7f, 0.7f, 1.0f});
+	gfx_draw_text(gamepad_get_name(), 170, 1000, 24.0f, default_color);
 }
 
 static void on_resize(int width, int height)

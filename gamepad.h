@@ -27,6 +27,7 @@
 void gamepad_init(int grab, void (*on_button)(int button));
 int gamepad_get_inotify();
 int gamepad_get_fd();
+char *gamepad_get_name();
 void gamepad_dispatch();
 void gamepad_grab();
 void gamepad_ungrab();

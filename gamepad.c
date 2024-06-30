@@ -132,6 +132,15 @@ int gamepad_get_fd()
 	return gamepad.gfd;
 }
 
+char *gamepad_get_name()
+{
+	if (gamepad.gfd > 0) {
+		return "connected";
+	} else {
+		return "not connected";
+	}
+}
+
 void gamepad_dispatch()
 {
 	// Try to read inotify
