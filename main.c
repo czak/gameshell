@@ -15,16 +15,16 @@ static int running = 1;
 static const int virtual_width = 1920;
 static const int virtual_height = 1080;
 
-const struct color selected_color = {0.4f, 1.0f, 0.5f, 1.0f};
-const struct color hover_color = {1.0f, 0.75f, 0.3f, 1.0f};
-const struct color default_color = {1.0f, 1.0f, 1.0f, 1.0f};
-const struct color dim_color = {1.0f, 1.0f, 1.0f, 0.25f};
+static const struct color selected_color = {0.4f, 1.0f, 0.5f, 1.0f};
+static const struct color hover_color = {1.0f, 0.75f, 0.3f, 1.0f};
+static const struct color default_color = {1.0f, 1.0f, 1.0f, 1.0f};
+static const struct color dim_color = {1.0f, 1.0f, 1.0f, 0.25f};
 
-struct menu commands_menu = {};
-struct menu actions_menu = {};
+static struct menu commands_menu = {};
+static struct menu actions_menu = {};
 
-struct menu *active_menu = &commands_menu;
-struct command *active_command = NULL;
+static struct menu *active_menu = &commands_menu;
+static struct command *active_command = NULL;
 
 static void on_command(void *data)
 {
