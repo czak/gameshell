@@ -195,6 +195,8 @@ int window_dispatch()
 
 void window_redraw()
 {
+	if (!window.visible) return;
+
 	if (window.on_draw)
 		window.on_draw();
 
@@ -216,6 +218,6 @@ void window_toggle()
 	} else {
 		window.visible = 1;
 
-		eglSwapBuffers(egl.display, window.egl_surface);
+		window_redraw();
 	}
 }
