@@ -12,10 +12,10 @@
 
 static int running = 1;
 
-const struct color selected_color = {0.4f, 1.0f, 0.5f};
-const struct color hover_color = {1.0f, 0.75f, 0.3f};
-const struct color default_color = {1.0f, 1.0f, 1.0f};
-const struct color dim_color = {0.8f, 0.8f, 0.8f};
+const struct color selected_color = {0.4f, 1.0f, 0.5f, 1.0f};
+const struct color hover_color = {1.0f, 0.75f, 0.3f, 1.0f};
+const struct color default_color = {1.0f, 1.0f, 1.0f, 1.0f};
+const struct color dim_color = {1.0f, 1.0f, 1.0f, 0.25f};
 
 struct menu commands_menu = {};
 struct menu actions_menu = {};
@@ -76,7 +76,7 @@ static void draw_menu(struct menu *menu, int px, int py)
 			}
 		}
 
-		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c.r, c.g, c.b);
+		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c);
 
 		py += 75;
 	}

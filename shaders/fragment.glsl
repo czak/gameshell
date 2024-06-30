@@ -4,7 +4,7 @@ precision mediump float;
 #define FONT_SIZE 64.0
 
 uniform sampler2D u_Sampler;
-uniform vec3 u_Color;
+uniform vec4 u_Color;
 uniform float u_Scale;
 
 varying vec2 v_TexCoord;
@@ -22,5 +22,5 @@ void main()
   sigDist *= u_Scale * FONT_PXRANGE / FONT_SIZE;
 
   float alpha = clamp(sigDist + 0.5, 0.0, 1.0);
-  gl_FragColor = vec4(u_Color.rgb, alpha);
+  gl_FragColor = u_Color * alpha;
 }

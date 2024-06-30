@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <GLES2/gl2.h>
 
+#include "gfx.h"
 #include "font.h"
 #include "image.h"
 #include "vertex_shader.h"
@@ -97,10 +98,10 @@ void gfx_resize(int width, int height)
 	glUniform2f(uniforms.viewport, 2.0f / width, 2.0f / height);
 }
 
-void gfx_draw_text(const char *msg, int x, int y, float scale, float r, float g, float b)
+void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 {
 	glBindTexture(GL_TEXTURE_2D, texture_font);
-	glUniform3f(uniforms.color, r, g, b);
+	glUniform4f(uniforms.color, c.r, c.g, c.b, c.a);
 	glUniform2f(uniforms.offset, x, y);
 	glUniform1f(uniforms.scale, scale);
 
