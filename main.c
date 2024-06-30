@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <poll.h>
 #include <signal.h>
 
@@ -46,6 +45,13 @@ static void on_stop()
 static void on_continue()
 {
 	kill(-active_command->pid, SIGCONT);
+}
+
+static void on_shell_action(void *data)
+{
+	if (fork() == 0) {
+		execl("/bin/sh", "/bin/sh", "-c", data, NULL);
+	}
 }
 
 static void draw_menu(struct menu *menu, int px, int py)
@@ -165,7 +171,7 @@ static void on_key(int key)
 
 static void on_child(uint32_t child_pid, int32_t code)
 {
-	assert(child_pid == active_command->pid);
+	if (child_pid != active_command->pid) return;
 
 	switch (code) {
 	case CLD_EXITED:
@@ -208,6 +214,8 @@ int main(int argc, char *argv[])
 	menu_append(&actions_menu, "Terminate", on_terminate, NULL);
 	menu_append(&actions_menu, "Stop", on_stop, NULL);
 	menu_append(&actions_menu, "Continue", on_continue, NULL);
+	menu_append(&actions_menu, "Fullscreen", on_shell_action, "swaymsg fullscreen toggle");
+	menu_append(&actions_menu, "Hide cursor", on_shell_action, "swaymsg seat seat0 cursor set 3840 2160");
 
 	enum {
 		WINDOW,
