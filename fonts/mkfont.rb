@@ -10,8 +10,6 @@ end
 font_path = ARGV[0]
 name = ARGV[1]
 
-puts "Loading #{font_path} as #{name}..."
-
 system(
   "msdf-atlas-gen",
   "-font", font_path,
@@ -54,7 +52,6 @@ end
 
 File.write("#{name}.c", <<~OUT)
 #include "font.h"
-
 
 // mkfont.rb #{font_path} #{name}
 struct font font = {
