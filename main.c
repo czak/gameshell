@@ -201,20 +201,13 @@ int main(int argc, char *argv[])
 
 	// Build commands menu from commands
 	for (int i = 0; i < commands_count; i++) {
-		commands_menu.items[i].name = commands[i]->name;
-		commands_menu.items[i].action = on_command;
-		commands_menu.items[i].data = commands[i];
+		menu_append(&commands_menu, commands[i]->name, on_command, commands[i]);
 	}
-	commands_menu.items_count = commands_count;
 
 	// Build actions menu
-	actions_menu.items[0].name = "Terminate";
-	actions_menu.items[0].action = on_terminate;
-	actions_menu.items[1].name = "Stop";
-	actions_menu.items[1].action = on_stop;
-	actions_menu.items[2].name = "Continue";
-	actions_menu.items[2].action = on_continue;
-	actions_menu.items_count = 3;
+	menu_append(&actions_menu, "Terminate", on_terminate, NULL);
+	menu_append(&actions_menu, "Stop", on_stop, NULL);
+	menu_append(&actions_menu, "Continue", on_continue, NULL);
 
 	enum {
 		WINDOW,

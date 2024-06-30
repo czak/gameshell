@@ -7,10 +7,12 @@ struct menu {
 		char *name;
 		void (*action)(void *data);
 		void *data;
-	} items[10];
+	} *items;
 	int items_count;
+	int items_capacity;
 };
 
+void menu_append(struct menu *menu, char *name, void (*action)(void *data), void *data);
 void menu_select(struct menu *menu);
 void menu_deselect(struct menu *menu);
 void menu_hover_next_item(struct menu *menu);
