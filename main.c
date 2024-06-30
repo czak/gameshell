@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 
 	// Build commands menu from commands
 	for (int i = 0; i < commands_count; i++) {
-		menu_append(&commands_menu, commands[i]->name, on_command, commands[i]);
+		menu_append(&commands_menu, commands[i].name, on_command, &commands[i]);
 	}
 
 	// Build actions menu

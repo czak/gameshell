@@ -10,7 +10,7 @@
 
 static const char *config_path = ".config/gameshell/commands";
 
-struct command **commands = NULL;
+struct command *commands = NULL;
 int commands_count = 0;
 int commands_capacity = 0;
 
@@ -27,11 +27,11 @@ static char *read_line(FILE *f) {
 	return line;
 }
 
-static void append(struct command *command)
+static void append(struct command command)
 {
 	if (commands_count == commands_capacity) {
 		commands_capacity = commands_capacity * 2 + 1;
-		commands = reallocarray(commands, commands_capacity, sizeof(struct command *));
+		commands = reallocarray(commands, commands_capacity, sizeof(struct command));
 	}
 
 	commands[commands_count++] = command;
@@ -53,35 +53,39 @@ static char *get_path()
 	return path;
 }
 
-static void parse_command(char *line, struct command *cmd)
+static struct command parse(char *line)
 {
+	struct command command = {0};
+
 	int arg = 0;
 	enum { NAME, WDIR, PATH, ARGS } pos = NAME;
 
 	for (char *tok = strtok(line, ";"); tok != NULL; tok = strtok(NULL, ";")) {
 		switch (pos) {
 			case NAME:
-				cmd->name = tok;
+				command.name = tok;
 				pos = WDIR;
 				break;
 
 			case WDIR:
-				cmd->wdir = tok;
+				command.wdir = tok;
 				pos = PATH;
 				break;
 
 			case PATH:
-				cmd->path = tok;
-				cmd->args[arg++] = tok;
+				command.path = tok;
+				command.args[arg++] = tok; // argv[0] for convenience
 				pos = ARGS;
 				break;
 
 			case ARGS:
 				assert(arg < MAX_ARGS);
-				cmd->args[arg++] = tok;
+				command.args[arg++] = tok;
 				break;
 		}
 	}
+
+	return command;
 }
 
 void commands_load()
@@ -103,10 +107,7 @@ void commands_load()
 		char *line = read_line(f);
 		if (!line) break;
 
-		struct command *command = calloc(1, sizeof(struct command));
-		parse_command(line, command);
-
-		append(command);
+		append(parse(line));
 	}
 
 	fclose(f);

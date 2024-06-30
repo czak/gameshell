@@ -12,7 +12,7 @@ struct command {
 	pid_t pid;
 };
 
-extern struct command **commands;
+extern struct command *commands;
 extern int commands_count;
 
 void commands_load();
