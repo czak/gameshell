@@ -2,9 +2,19 @@
 require 'json'
 require 'bigdecimal'
 
+if ARGV.count != 2
+  $stderr.puts("Usage: mkfont.rb path_to.ttf name")
+  exit(1)
+end
+
+font_path = ARGV[0]
+name = ARGV[1]
+
+puts "Loading #{font_path} as #{name}..."
+
 system(
   "msdf-atlas-gen",
-  "-font", "/usr/share/fonts/TTF/JetBrainsMono-SemiBold.ttf",
+  "-font", font_path,
   "-size", "64",
   "-type", "msdf",
   "-pxrange", "2",
@@ -42,7 +52,7 @@ texture = pixels.each_slice(16).map do |line|
   line.map { |n| "0x#{n}" }.join(", ")
 end
 
-File.write("jetbrains.c", <<~OUT)
+File.write("#{name}.c", <<~OUT)
 #include "font.h"
 
 struct font font = {
