@@ -23,6 +23,7 @@ static struct {
 	GLint offset;
 	GLint scale;
 	GLint viewport;
+	GLint viewport_ratio;
 	GLint color;
 } uniforms;
 
@@ -68,6 +69,8 @@ void gfx_init()
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
 	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
+	uniforms.viewport_ratio = glGetUniformLocation(program, "u_ViewportRatio");
+
 	uniforms.color = glGetUniformLocation(program, "u_Color");
 
 	glUseProgram(program);
@@ -92,10 +95,11 @@ void gfx_clear(float red, float green, float blue, float alpha)
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void gfx_resize(int width, int height)
+void gfx_resize(int device_width, int device_height, int viewport_width, int viewport_height)
 {
-	glViewport(0, 0, width, height);
-	glUniform2f(uniforms.viewport, 2.0f / width, 2.0f / height);
+	glViewport(0, 0, device_width, device_height);
+	glUniform2f(uniforms.viewport, viewport_width, viewport_height);
+	glUniform1f(uniforms.viewport_ratio, (float) device_width / viewport_width);
 }
 
 void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)

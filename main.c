@@ -12,6 +12,9 @@
 
 static int running = 1;
 
+static const int virtual_width = 1920;
+static const int virtual_height = 1080;
+
 const struct color selected_color = {0.4f, 1.0f, 0.5f, 1.0f};
 const struct color hover_color = {1.0f, 0.75f, 0.3f, 1.0f};
 const struct color default_color = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -84,6 +87,11 @@ static void on_draw()
 	if (commands_menu.selected >= 0) {
 		draw_menu(&actions_menu, 500, 100);
 	}
+}
+
+static void on_resize(int width, int height)
+{
+	gfx_resize(width, height, virtual_width, virtual_height);
 }
 
 static void on_button(int button)
@@ -182,7 +190,7 @@ int main(int argc, char *argv[])
 {
 	commands_load();
 
-	window_init(on_draw, gfx_resize, on_key);
+	window_init(on_draw, on_resize, on_key);
 	gamepad_init(GAMEPAD_GRABBED, on_button);
 	signals_init(on_child);
 
