@@ -15,6 +15,7 @@ static struct {
 	int ifd;
 	int gfd;
 	int grabbed;
+	void (*on_gamepad)(void);
 	void (*on_button)(int button);
 } gamepad;
 
@@ -111,14 +112,15 @@ static int gamepad_open()
 	return fd;
 }
 
-void gamepad_init(int grab, void (*on_button)(int button))
+void gamepad_init(void (*on_gamepad)(void), void (*on_button)(int button))
 {
 	gamepad.ifd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
 	inotify_add_watch(gamepad.ifd, "/dev/input", IN_CREATE | IN_ATTRIB);
 
 	gamepad.gfd = gamepad_open();
-	if (grab) gamepad_grab();
+	gamepad_grab();
 
+	gamepad.on_gamepad = on_gamepad;
 	gamepad.on_button = on_button;
 }
 
@@ -153,6 +155,7 @@ void gamepad_dispatch()
 		if (gamepad.gfd < 0) {
 			gamepad.gfd = gamepad_open();
 			if (gamepad.grabbed) gamepad_grab();
+			if (gamepad.on_gamepad) gamepad.on_gamepad();
 		}
 	}
 	else if (n < 0 && errno != EWOULDBLOCK) {
@@ -188,6 +191,7 @@ void gamepad_dispatch()
 		close(gamepad.gfd);
 		gamepad.gfd = gamepad_open();
 		if (gamepad.grabbed) gamepad_grab();
+		if (gamepad.on_gamepad) gamepad.on_gamepad();
 	}
 }
 

@@ -97,6 +97,11 @@ static void on_resize(int width, int height)
 	gfx_resize(width, height, virtual_width, virtual_height);
 }
 
+static void on_gamepad()
+{
+	window_redraw();
+}
+
 static void on_button(int button)
 {
 	LOG("Button: %d", button);
@@ -194,7 +199,7 @@ int main(int argc, char *argv[])
 	commands_load();
 
 	window_init(on_draw, on_resize, on_key);
-	gamepad_init(GAMEPAD_GRABBED, on_button);
+	gamepad_init(on_gamepad, on_button);
 	signals_init(on_child);
 
 	gfx_init();
