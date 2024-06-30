@@ -11,6 +11,7 @@ void menu_append(struct menu *menu, char *name, void (*action)(void *data), void
 
 	struct menu_item *item = &menu->items[menu->items_count];
 
+	// NOTE: name is not copied, potential use after free, e.g. if commands are reloaded
 	item->name = name;
 	item->action = action;
 	item->data = data;
