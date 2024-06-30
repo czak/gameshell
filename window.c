@@ -110,7 +110,6 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	if (height > 0) window.height = height;
 
 	wl_egl_window_resize(window.wl_egl_window, window.width, window.height, 0, 0);
-	wl_surface_commit(window.wl_surface);
 
 	if (window.on_resize)
 		window.on_resize(window.width, window.height);
