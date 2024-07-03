@@ -25,7 +25,6 @@ static void on_command(void *data)
 	active_command = data;
 	command_exec(active_command);
 
-	menu_select(&commands_menu);
 	active_menu = &actions_menu;
 
 	window_redraw();
@@ -57,21 +56,21 @@ static void on_shell_action(void *data)
 static void draw_menu(struct menu *menu, int px, int py)
 {
 	static struct color colors[2][2] = {
-		// Menu not selected
-		{
-			{1.0f, 1.0f, 1.0f, 1.0f},  // not hovered
-			{1.0f, 0.75f, 0.3f, 1.0f}, // hovered
-		},
-
-		// Menu selected
+		// Menu inactive
 		{
 			{1.0f, 1.0f, 1.0f, 0.25f}, // not selected
 			{0.4f, 1.0f, 0.5f, 1.0f},  // selected
 		},
+
+		// Menu active
+		{
+			{1.0f, 1.0f, 1.0f, 1.0f},  // not selected
+			{1.0f, 0.75f, 0.3f, 1.0f}, // selected
+		},
 	};
 
 	for (int i = 0; i < menu->items_count; i++) {
-		struct color c = colors[menu->selected][i == menu->hover];
+		struct color c = colors[menu == active_menu][i == menu->selected_item];
 
 		gfx_draw_text(menu->items[i].name, px + 2, py + 2, 64.0f, (struct color){0.0f, 0.0f, 0.0f, 0.6f});
 		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c);
@@ -132,12 +131,12 @@ static void on_button(int button)
 			break;
 
 		case BTN_DPAD_UP:
-			menu_hover_prev_item(active_menu);
+			menu_select_prev_item(active_menu);
 			window_redraw();
 			break;
 
 		case BTN_DPAD_DOWN:
-			menu_hover_next_item(active_menu);
+			menu_select_next_item(active_menu);
 			window_redraw();
 			break;
 	}
@@ -156,12 +155,12 @@ static void on_key(int key)
 			break;
 
 		case 103: // Up
-			menu_hover_prev_item(active_menu);
+			menu_select_prev_item(active_menu);
 			window_redraw();
 			break;
 
 		case 108: // Down
-			menu_hover_next_item(active_menu);
+			menu_select_next_item(active_menu);
 			window_redraw();
 			break;
 
@@ -179,7 +178,6 @@ static void on_child(uint32_t child_pid, int32_t code)
 	case CLD_KILLED:
 	case CLD_DUMPED:
 		LOG("Child %d exited (%d)", child_pid, code);
-		menu_deselect(&commands_menu);
 		active_menu = &commands_menu;
 		active_command = NULL;
 		break;
