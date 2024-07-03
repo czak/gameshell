@@ -1,5 +1,6 @@
 #include <poll.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #include "window.h"
 #include "gfx.h"
@@ -192,6 +193,7 @@ static void on_child(uint32_t child_pid, int32_t code)
 	case CLD_KILLED:
 	case CLD_DUMPED:
 		LOG("Child %d exited (%d)", child_pid, code);
+		waitpid(child_pid, NULL, 0);
 		child_command->pid = 0;
 
 		if (child_command == active_command) {
