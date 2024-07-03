@@ -133,3 +133,13 @@ void command_exec(struct command *command)
         LOG("Fork failed");
 	}
 }
+
+struct command *command_find(pid_t pid) {
+	for (int i = 0; i < commands_count; i++) {
+		if (commands[i].pid == pid) {
+			return &commands[i];
+		}
+	}
+
+	return NULL;
+}

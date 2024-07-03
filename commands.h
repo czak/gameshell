@@ -17,3 +17,4 @@ extern int commands_count;
 
 void commands_load();
 void command_exec(struct command *cmd);
+struct command *command_find(pid_t pid);

@@ -22,10 +22,12 @@ static struct command *active_command = NULL;
 
 static void on_command(void *data)
 {
-	active_command = data;
-	command_exec(active_command);
-
 	active_menu = &actions_menu;
+	active_command = data;
+
+	if (active_command->pid == 0) {
+		command_exec(active_command);
+	}
 
 	window_redraw();
 }
@@ -130,6 +132,11 @@ static void on_button(int button)
 			window_redraw();
 			break;
 
+		case BTN_EAST:
+			active_menu = &commands_menu;
+			window_redraw();
+			break;
+
 		case BTN_DPAD_UP:
 			menu_select_prev_item(active_menu);
 			window_redraw();
@@ -147,6 +154,11 @@ static void on_key(int key)
 	switch (key) {
 		case 1: // Escape
 			running = 0;
+			break;
+
+		case 14: // Backspace
+			active_menu = &commands_menu;
+			window_redraw();
 			break;
 
 		case 28: // Enter
@@ -171,15 +183,22 @@ static void on_key(int key)
 
 static void on_child(uint32_t child_pid, int32_t code)
 {
-	if (child_pid != active_command->pid) return;
+	struct command *child_command = command_find(child_pid);
+
+	if (child_command == NULL) return;
 
 	switch (code) {
 	case CLD_EXITED:
 	case CLD_KILLED:
 	case CLD_DUMPED:
 		LOG("Child %d exited (%d)", child_pid, code);
-		active_menu = &commands_menu;
-		active_command = NULL;
+		child_command->pid = 0;
+
+		if (child_command == active_command) {
+			active_menu = &commands_menu;
+			active_command = NULL;
+		}
+
 		break;
 
 	case CLD_STOPPED:
