@@ -75,8 +75,8 @@ static void draw_menu(struct menu *menu, int px, int py)
 	for (int i = 0; i < menu->items_count; i++) {
 		struct color c = colors[menu == active_menu][i == menu->selected_item];
 
-		gfx_draw_text(menu->items[i].name, px + 2, py + 2, 64.0f, (struct color){0.0f, 0.0f, 0.0f, 0.6f});
-		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c);
+		gfx_draw_text(menu->items[i].name, px + 4, py + 4, 4.0f, (struct color){0.0f, 0.0f, 0.0f, 0.6f});
+		gfx_draw_text(menu->items[i].name, px, py, 4.0f, c);
 
 		py += 75;
 	}
@@ -86,14 +86,14 @@ static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
-	draw_menu(&commands_menu, 50, 100);
+	draw_menu(&commands_menu, 50, 50);
 
 	if (active_menu == &actions_menu) {
-		draw_menu(&actions_menu, 500, 100);
+		draw_menu(&actions_menu, 500, 50);
 	}
 
-	gfx_draw_text("Gamepad:", 50, 1000, 24.0f, (struct color){0.7f, 0.7f, 0.7f, 1.0f});
-	gfx_draw_text(gamepad_get_name(), 170, 1000, 24.0f, (struct color){1.0f, 1.0f, 1.0f, 1.0f});
+	gfx_draw_text("Gamepad:", 50, 1000, 2.0f, (struct color){0.7f, 0.7f, 0.7f, 1.0f});
+	gfx_draw_text(gamepad_get_name(), 190, 1000, 2.0f, (struct color){1.0f, 1.0f, 1.0f, 1.0f});
 }
 
 static void on_resize(int width, int height)

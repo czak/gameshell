@@ -18,5 +18,5 @@ void main()
 		1.0 - 2.0 * pos.y / u_Viewport.y,
 		0.0,
 		1.0);
-	v_TexCoord = a_TexCoord / 512.0;
+	v_TexCoord = a_TexCoord;
 }

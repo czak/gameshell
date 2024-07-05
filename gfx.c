@@ -3,19 +3,18 @@
 #include <GLES2/gl2.h>
 
 #include "gfx.h"
-#include "font.h"
 #include "image.h"
 #include "vertex_shader.h"
 #include "fragment_shader.h"
 
-extern struct font font;
+extern unsigned char font[128 * 128];
 
 static GLuint program;
 static GLuint texture_font;
 
 static struct vertex {
-	GLfloat x, y;
-	GLfloat s, t;
+	GLshort x, y;
+	GLshort s, t;
 } vertices[4];
 
 static struct {
@@ -23,7 +22,6 @@ static struct {
 	GLint offset;
 	GLint scale;
 	GLint viewport;
-	GLint viewport_ratio;
 	GLint color;
 } uniforms;
 
@@ -69,18 +67,17 @@ void gfx_init()
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
 	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
-	uniforms.viewport_ratio = glGetUniformLocation(program, "u_ViewportRatio");
 
 	uniforms.color = glGetUniformLocation(program, "u_Color");
 
 	glUseProgram(program);
 
 	// Load font texture
-	texture_font = texture_init(GL_RGB, 512, 512, font.texture);
+	texture_font = texture_init(GL_ALPHA, 128, 128, font);
 
 	// Prepare to draw quads with texture coords
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLfloat));
+	glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
+	glVertexAttribPointer(1, 2, GL_SHORT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLshort));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -99,7 +96,6 @@ void gfx_resize(int device_width, int device_height, int viewport_width, int vie
 {
 	glViewport(0, 0, device_width, device_height);
 	glUniform2f(uniforms.viewport, viewport_width, viewport_height);
-	glUniform1f(uniforms.viewport_ratio, (float) device_width / viewport_width);
 }
 
 void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
@@ -113,17 +109,25 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 	while (*msg != '\0') {
 		int index = *msg - ' ';
 
-		struct glyph *g = &font.glyphs[index];
+		int pl = 0;
+		int pt = 0;
+		int pr = 8;
+		int pb = 16;
 
-		vertices[0] = (struct vertex){ g->pl, g->pt, g->tl, g->tt };
-		vertices[1] = (struct vertex){ g->pl, g->pb, g->tl, g->tb };
-		vertices[2] = (struct vertex){ g->pr, g->pt, g->tr, g->tt };
-		vertices[3] = (struct vertex){ g->pr, g->pb, g->tr, g->tb };
+		int tl = (index % 16) * 8;
+		int tt = (index / 16) * 16;
+		int tr = tl + 8;
+		int tb = tt + 16;
+
+		vertices[0] = (struct vertex){ pl, pt, tl, tt };
+		vertices[1] = (struct vertex){ pl, pb, tl, tb };
+		vertices[2] = (struct vertex){ pr, pt, tr, tt };
+		vertices[3] = (struct vertex){ pr, pb, tr, tb };
 
 		glUniform2f(uniforms.position, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-		px += g->advance;
+		px += 8;
 
 		msg++;
 	}
