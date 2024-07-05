@@ -219,7 +219,9 @@ int main(int argc, char *argv[])
 {
 	commands_load();
 
-	window_init(on_draw, on_resize, on_key);
+	int use_keyboard = argc > 1;
+
+	window_init(on_draw, on_resize, use_keyboard ? on_key : NULL);
 	gamepad_init(on_gamepad, on_button);
 	signals_init(on_child);
 
