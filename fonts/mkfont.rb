@@ -9,18 +9,34 @@ end
 
 font_path = ARGV[0]
 name = ARGV[1]
+size = "64"
+pxrange = "4"
+dimensions = ["512", "512"]
 
 system(
   "msdf-atlas-gen",
   "-font", font_path,
-  "-size", "64",
+  "-size", size,
   "-type", "msdf",
-  "-pxrange", "2",
+  "-pxrange", pxrange,
   "-format", "text",
   "-yorigin", "top",
-  "-dimensions", "512", "512",
+  "-dimensions", dimensions[0], dimensions[1],
   "-imageout", "/tmp/font.txt",
   "-json", "/tmp/font.json",
+)
+
+# also generate png
+system(
+  "msdf-atlas-gen",
+  "-font", font_path,
+  "-size", size,
+  "-type", "msdf",
+  "-pxrange", pxrange,
+  "-format", "png",
+  "-yorigin", "top",
+  "-dimensions", dimensions[0], dimensions[1],
+  "-imageout", "/tmp/font.png",
 )
 
 json = JSON.parse(File.read("/tmp/font.json"), decimal_class: BigDecimal)
