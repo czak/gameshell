@@ -77,10 +77,16 @@ File.write("#{name}.c", <<~OUT)
 
 // mkfont.rb #{font_path} #{name}
 struct font font = {
+	.size = #{size},
+	.pxrange = #{pxrange},
+	.pxpadding = #{pxpadding},
+	.outerpxpadding = #{outerpxpadding},
+	.atlas_width = #{dimensions[0]},
+	.atlas_height = #{dimensions[1]},
 	.glyphs = {
 		#{glyphs.join("\n\t\t")}
 	},
-	.texture = {
+	.atlas = {
 	  #{texture.join(",\n\t\t")}
 	},
 };

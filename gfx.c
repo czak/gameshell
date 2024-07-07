@@ -76,7 +76,7 @@ void gfx_init()
 	glUseProgram(program);
 
 	// Load font texture
-	texture_font = texture_init(GL_RGB, 512, 512, font.texture);
+	texture_font = texture_init(GL_RGB, 512, 512, font.atlas);
 
 	// Prepare to draw quads with texture coords
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
