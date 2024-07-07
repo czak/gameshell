@@ -75,7 +75,6 @@ static void draw_menu(struct menu *menu, int px, int py)
 	for (int i = 0; i < menu->items_count; i++) {
 		struct color c = colors[menu == active_menu][i == menu->selected_item];
 
-		gfx_draw_text(menu->items[i].name, px + 2, py + 2, 64.0f, (struct color){0.0f, 0.0f, 0.0f, 0.6f});
 		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c);
 
 		py += 75;

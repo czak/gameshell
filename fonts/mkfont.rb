@@ -11,6 +11,8 @@ font_path = ARGV[0]
 name = ARGV[1]
 size = "64"
 pxrange = "4"
+pxpadding = "2"
+outerpxpadding = "2"
 dimensions = ["512", "512"]
 
 system(
@@ -19,6 +21,8 @@ system(
   "-size", size,
   "-type", "msdf",
   "-pxrange", pxrange,
+  "-pxpadding", pxpadding,
+  "-outerpxpadding", outerpxpadding,
   "-format", "text",
   "-yorigin", "top",
   "-dimensions", dimensions[0], dimensions[1],
@@ -33,6 +37,8 @@ system(
   "-size", size,
   "-type", "msdf",
   "-pxrange", pxrange,
+  "-pxpadding", pxpadding,
+  "-outerpxpadding", outerpxpadding,
   "-format", "png",
   "-yorigin", "top",
   "-dimensions", dimensions[0], dimensions[1],
@@ -79,3 +85,38 @@ struct font font = {
 	},
 };
 OUT
+
+px = 0
+data = []
+
+"Hello, world!".each_char do |ch|
+  g = json["glyphs"][ch.ord - 32]
+
+  p = g["planeBounds"] || Hash.new(BigDecimal('0'))
+  t = g["atlasBounds"] || Hash.new(BigDecimal('0'))
+  adv = g["advance"]
+
+  pl = p["left"]
+  pb = p["bottom"]
+  pr = p["right"]
+  pt = p["top"]
+
+  tl = t["left"]
+  tb = t["bottom"]
+  tr = t["right"]
+  tt = t["top"]
+
+  data.append(
+    px + pl, pt, tl, tt,
+    px + pl, pb, tl, tb,
+    px + pr, pt, tr, tt,
+
+    px + pr, pt, tr, tt,
+    px + pl, pb, tl, tb,
+    px + pr, pb, tr, tb,
+  )
+
+  px += adv
+end
+
+File.write("/tmp/buffer.bin", data.pack("f*"))
