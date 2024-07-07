@@ -21,8 +21,8 @@ void main()
   float fg_alpha = opacity(v_TexCoord);
   float shadow_alpha = opacity(v_TexCoord - 2.0 / 512.0);
 
-  vec4 fg = vec4(u_Color.rgb, u_Color.a * fg_alpha);
+  vec4 fg = vec4(u_Color.rgb, fg_alpha);
   vec4 shadow = vec4(0.0, 0.0, 0.0, shadow_alpha);
 
-  gl_FragColor = mix(shadow, fg, fg_alpha);
+  gl_FragColor = mix(shadow, fg, fg_alpha) * u_Color.a;
 }
