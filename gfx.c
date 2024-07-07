@@ -19,7 +19,6 @@ static struct vertex {
 } vertices[4];
 
 static struct {
-	GLint position;
 	GLint offset;
 	GLint scale;
 	GLint viewport;
@@ -65,7 +64,6 @@ void gfx_init()
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	assert(success);
 
-	uniforms.position = glGetUniformLocation(program, "u_Position");
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
 	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
@@ -109,18 +107,17 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 	glUniform2f(uniforms.offset, x, y);
 	glUniform1f(uniforms.scale, scale);
 
-	float px = 0, py = 0;
+	float px = 0;
 	while (*msg != '\0') {
 		int index = *msg - ' ';
 
 		struct glyph *g = &font.glyphs[index];
 
-		vertices[0] = (struct vertex){ g->pl, g->pt, g->tl, g->tt };
-		vertices[1] = (struct vertex){ g->pl, g->pb, g->tl, g->tb };
-		vertices[2] = (struct vertex){ g->pr, g->pt, g->tr, g->tt };
-		vertices[3] = (struct vertex){ g->pr, g->pb, g->tr, g->tb };
+		vertices[0] = (struct vertex){ px + g->pl, g->pt, g->tl, g->tt };
+		vertices[1] = (struct vertex){ px + g->pl, g->pb, g->tl, g->tb };
+		vertices[2] = (struct vertex){ px + g->pr, g->pt, g->tr, g->tt };
+		vertices[3] = (struct vertex){ px + g->pr, g->pb, g->tr, g->tb };
 
-		glUniform2f(uniforms.position, px, py);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		px += g->advance;
