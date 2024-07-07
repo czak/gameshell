@@ -22,9 +22,13 @@ static struct {
 	GLint offset;
 	GLint scale;
 	GLint viewport;
-	GLint viewport_ratio;
 	GLint color;
+	GLint screenpxrange;
 } uniforms;
+
+// ratio of device_width / viewport_width
+// may be > 1 for HiDPI
+static float viewport_scale;
 
 static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const void *pixels)
 {
@@ -67,7 +71,7 @@ void gfx_init()
 	uniforms.offset = glGetUniformLocation(program, "u_Offset");
 	uniforms.scale = glGetUniformLocation(program, "u_Scale");
 	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
-	uniforms.viewport_ratio = glGetUniformLocation(program, "u_ViewportRatio");
+	uniforms.screenpxrange = glGetUniformLocation(program, "u_ScreenPxRange");
 
 	uniforms.color = glGetUniformLocation(program, "u_Color");
 
@@ -97,15 +101,20 @@ void gfx_resize(int device_width, int device_height, int viewport_width, int vie
 {
 	glViewport(0, 0, device_width, device_height);
 	glUniform2f(uniforms.viewport, viewport_width, viewport_height);
-	glUniform1f(uniforms.viewport_ratio, (float) device_width / viewport_width);
+
+	viewport_scale = (float) device_width / viewport_width;
 }
 
 void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 {
 	glBindTexture(GL_TEXTURE_2D, texture_font);
-	glUniform4f(uniforms.color, c.r, c.g, c.b, c.a);
 	glUniform2f(uniforms.offset, x, y);
 	glUniform1f(uniforms.scale, scale);
+	glUniform4f(uniforms.color, c.r, c.g, c.b, c.a);
+
+	// see https://github.com/Chlumsky/msdfgen/blob/master/README.md#using-a-multi-channel-distance-field
+	float screenpxrange = scale * viewport_scale * font.pxrange / font.size;
+	glUniform1f(uniforms.screenpxrange, screenpxrange >= 1 ? screenpxrange : 1);
 
 	float px = 0;
 	while (*msg != '\0') {
