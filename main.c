@@ -128,7 +128,7 @@ static void on_button(int button)
 			break;
 
 		case BTN_SOUTH:
-			menu_trigger_item(active_menu);
+			menu_trigger(active_menu);
 			window_redraw();
 			break;
 
@@ -138,12 +138,12 @@ static void on_button(int button)
 			break;
 
 		case BTN_DPAD_UP:
-			menu_select_prev_item(active_menu);
+			menu_select_prev(active_menu);
 			window_redraw();
 			break;
 
 		case BTN_DPAD_DOWN:
-			menu_select_next_item(active_menu);
+			menu_select_next(active_menu);
 			window_redraw();
 			break;
 	}
@@ -162,17 +162,17 @@ static void on_key(int key)
 			break;
 
 		case 28: // Enter
-			menu_trigger_item(active_menu);
+			menu_trigger(active_menu);
 			window_redraw();
 			break;
 
 		case 103: // Up
-			menu_select_prev_item(active_menu);
+			menu_select_prev(active_menu);
 			window_redraw();
 			break;
 
 		case 108: // Down
-			menu_select_next_item(active_menu);
+			menu_select_next(active_menu);
 			window_redraw();
 			break;
 
