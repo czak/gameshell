@@ -88,10 +88,8 @@ static void draw_menu(struct menu *menu, int px, int py)
 	};
 
 	for (int i = 0; i < menu->items_count; i++) {
+		struct menu_item menu_item = menu_get_menu_item(menu, i);
 		struct color c = colors[menu == active_menu][i == menu->selected_item];
-
-		void *item = menu->items[i];
-		struct menu_item menu_item = menu->resolver(item);
 
 		gfx_draw_text(menu_item.name, px, py, 64.0f, c);
 

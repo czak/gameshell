@@ -17,6 +17,8 @@ struct menu {
 	struct menu_item (*resolver)(void *item);
 };
 
+struct menu_item menu_get_menu_item(struct menu *menu, int index);
+
 void menu_append(struct menu *menu, void *item);
 void menu_select_next(struct menu *menu);
 void menu_select_prev(struct menu *menu);

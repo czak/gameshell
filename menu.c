@@ -1,6 +1,13 @@
+#include <assert.h>
 #include <stdlib.h>
 
 #include "menu.h"
+
+struct menu_item menu_get_menu_item(struct menu *menu, int index) {
+	assert(index >= 0 && index < menu->items_count);
+
+	return menu->resolver(menu->items[index]);
+}
 
 void menu_append(struct menu *menu, void *item)
 {
@@ -24,9 +31,8 @@ void menu_select_prev(struct menu *menu)
 
 void menu_trigger(struct menu *menu)
 {
-	void *item = menu->items[menu->selected_item];
-	struct menu_item menu_item = menu->resolver(item);
+	struct menu_item menu_item = menu_get_menu_item(menu, menu->selected_item);
 	if (menu_item.callback) {
-		menu_item.callback(item);
+		menu_item.callback(menu_item.item);
 	}
 }
