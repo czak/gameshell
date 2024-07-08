@@ -21,6 +21,20 @@ static struct menu actions_menu = {};
 static struct menu *active_menu = &commands_menu;
 static struct command *active_command = NULL;
 
+struct action {
+	void (*callback)(void *data);
+	char *param;
+};
+
+static void on_action(void *data)
+{
+	struct action *action = data;
+
+	if (action->callback) {
+		action->callback(action->param);
+	}
+}
+
 static void on_command(void *data)
 {
 	active_menu = &actions_menu;
@@ -232,11 +246,11 @@ int main(int argc, char *argv[])
 	}
 
 	// Build actions menu
-	menu_append(&actions_menu, "Terminate", on_terminate, NULL);
-	menu_append(&actions_menu, "Stop", on_stop, NULL);
-	menu_append(&actions_menu, "Continue", on_continue, NULL);
-	menu_append(&actions_menu, "Fullscreen", on_shell_action, "swaymsg fullscreen toggle");
-	menu_append(&actions_menu, "Hide cursor", on_shell_action, "swaymsg seat seat0 cursor set 3840 2160");
+	menu_append(&actions_menu, "Terminate", on_action, &(struct action){on_terminate, NULL});
+	menu_append(&actions_menu, "Stop", on_action, &(struct action){on_stop, NULL});
+	menu_append(&actions_menu, "Continue", on_action, &(struct action){on_continue, NULL});
+	menu_append(&actions_menu, "Fullscreen", on_action, &(struct action){on_shell_action, "swaymsg fullscreen toggle"});
+	menu_append(&actions_menu, "Hide cursor", on_action, &(struct action){on_shell_action, "swaymsg seat seat0 cursor set 3840 2160"});
 
 	enum {
 		WINDOW,
