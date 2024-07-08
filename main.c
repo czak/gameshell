@@ -22,6 +22,7 @@ static struct menu *active_menu = &commands_menu;
 static struct command *active_command = NULL;
 
 struct action {
+	char *name;
 	void (*callback)(void *data);
 	char *param;
 };
@@ -89,7 +90,10 @@ static void draw_menu(struct menu *menu, int px, int py)
 	for (int i = 0; i < menu->items_count; i++) {
 		struct color c = colors[menu == active_menu][i == menu->selected_item];
 
-		gfx_draw_text(menu->items[i].name, px, py, 64.0f, c);
+		void *item = menu->items[i];
+		struct menu_item menu_item = menu->resolver(item);
+
+		gfx_draw_text(menu_item.name, px, py, 64.0f, c);
 
 		py += 75;
 	}
@@ -228,6 +232,28 @@ static void on_child(uint32_t child_pid, int32_t code)
 	window_redraw();
 }
 
+static struct menu_item actions_menu_item(void *item)
+{
+	struct action *action = item;
+
+	return (struct menu_item){
+		.name = action->name,
+		.callback = on_action,
+		.item = item,
+	};
+}
+
+static struct menu_item commands_menu_item(void *item)
+{
+	struct command *command = item;
+
+	return (struct menu_item){
+		.name = command->name,
+		.callback = on_command,
+		.item = item,
+	};
+}
+
 int main(int argc, char *argv[])
 {
 	commands_load();
@@ -241,16 +267,18 @@ int main(int argc, char *argv[])
 	gfx_init();
 
 	// Build commands menu from commands
+	commands_menu.resolver = commands_menu_item;
 	for (int i = 0; i < commands_count; i++) {
-		menu_append(&commands_menu, commands[i].name, on_command, &commands[i]);
+		menu_append(&commands_menu, &commands[i]);
 	}
 
 	// Build actions menu
-	menu_append(&actions_menu, "Terminate", on_action, &(struct action){on_terminate, NULL});
-	menu_append(&actions_menu, "Stop", on_action, &(struct action){on_stop, NULL});
-	menu_append(&actions_menu, "Continue", on_action, &(struct action){on_continue, NULL});
-	menu_append(&actions_menu, "Fullscreen", on_action, &(struct action){on_shell_action, "swaymsg fullscreen toggle"});
-	menu_append(&actions_menu, "Hide cursor", on_action, &(struct action){on_shell_action, "swaymsg seat seat0 cursor set 3840 2160"});
+	actions_menu.resolver = actions_menu_item;
+	menu_append(&actions_menu, &(struct action){"Terminate", on_terminate, NULL});
+	menu_append(&actions_menu, &(struct action){"Stop", on_stop, NULL});
+	menu_append(&actions_menu, &(struct action){"Continue", on_continue, NULL});
+	menu_append(&actions_menu, &(struct action){"Fullscreen", on_shell_action, "swaymsg fullscreen toggle"});
+	menu_append(&actions_menu, &(struct action){"Hide cursor", on_shell_action, "swaymsg seat seat0 cursor set 3840 2160"});
 
 	enum {
 		WINDOW,
