@@ -64,13 +64,6 @@ static void on_continue()
 	kill(-active_command->pid, SIGCONT);
 }
 
-static void on_shell_action(void *data)
-{
-	if (fork() == 0) {
-		execl("/bin/sh", "/bin/sh", "-c", data, NULL);
-	}
-}
-
 static void draw_menu(struct menu *menu, int px, int py)
 {
 	static struct color colors[2][2] = {
@@ -287,7 +280,6 @@ int main(int argc, char *argv[])
 	menu_append(&actions_menu, &(struct action){"Terminate", on_terminate, NULL});
 	menu_append(&actions_menu, &(struct action){"Stop", on_stop, NULL});
 	menu_append(&actions_menu, &(struct action){"Continue", on_continue, NULL});
-	menu_append(&actions_menu, &(struct action){"Fullscreen", on_shell_action, "swaymsg fullscreen toggle"});
 
 	enum {
 		WINDOW,
