@@ -288,7 +288,6 @@ int main(int argc, char *argv[])
 	menu_append(&actions_menu, &(struct action){"Stop", on_stop, NULL});
 	menu_append(&actions_menu, &(struct action){"Continue", on_continue, NULL});
 	menu_append(&actions_menu, &(struct action){"Fullscreen", on_shell_action, "swaymsg fullscreen toggle"});
-	menu_append(&actions_menu, &(struct action){"Hide cursor", on_shell_action, "swaymsg seat seat0 cursor set 3840 2160"});
 
 	enum {
 		WINDOW,
