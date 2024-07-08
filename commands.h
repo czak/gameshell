@@ -10,6 +10,7 @@ struct command {
 	char *path;
 	char *args[MAX_ARGS];
 	pid_t pid;
+	int stopped;
 };
 
 extern struct command *commands;

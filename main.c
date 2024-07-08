@@ -93,7 +93,7 @@ static void draw_menu(struct menu *menu, int px, int py)
 
 		gfx_draw_text(menu_item.name, px, py, 64.0f, c);
 		if (menu_item.subtitle) {
-			gfx_draw_text(menu_item.subtitle, px, py + 15, 20.0f, (struct color){1.0f, 0.5f, 0.5f, 1.0f});
+			gfx_draw_text(menu_item.subtitle, px, py + 15, 20.0f, c);
 		}
 
 		py += 75;
@@ -200,21 +200,22 @@ static void on_key(int key)
 	}
 }
 
-static void on_child(uint32_t child_pid, int32_t code)
+static void on_child(uint32_t pid, int32_t code)
 {
-	struct command *child_command = command_find(child_pid);
+	struct command *command = command_find(pid);
 
-	if (child_command == NULL) return;
+	if (command == NULL) return;
 
 	switch (code) {
 	case CLD_EXITED:
 	case CLD_KILLED:
 	case CLD_DUMPED:
-		LOG("Child %d exited (%d)", child_pid, code);
-		waitpid(child_pid, NULL, 0);
-		child_command->pid = 0;
+		LOG("Child %d exited (%d)", pid, code);
+		waitpid(pid, NULL, 0);
+		command->pid = 0;
+		command->stopped = 0;
 
-		if (child_command == active_command) {
+		if (command == active_command) {
 			active_menu = &commands_menu;
 			active_command = NULL;
 		}
@@ -222,11 +223,13 @@ static void on_child(uint32_t child_pid, int32_t code)
 		break;
 
 	case CLD_STOPPED:
-		LOG("Child %d stopped", child_pid);
+		LOG("Child %d stopped", pid);
+		command->stopped = 1;
 		break;
 
 	case CLD_CONTINUED:
-		LOG("Child %d continued", child_pid);
+		LOG("Child %d continued", pid);
+		command->stopped = 0;
 		break;
 	}
 
@@ -248,9 +251,14 @@ static struct menu_item commands_menu_item(void *item)
 {
 	struct command *command = item;
 
+	char *subtitle = NULL;
+	if (command->pid) {
+		subtitle = command->stopped ? "stopped": "running";
+	}
+
 	return (struct menu_item){
 		.name = command->name,
-		.subtitle = command->pid ? "running" : NULL,
+		.subtitle = subtitle,
 		.callback = on_command,
 		.item = item,
 	};
