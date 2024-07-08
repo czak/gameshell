@@ -92,6 +92,9 @@ static void draw_menu(struct menu *menu, int px, int py)
 		struct color c = colors[menu == active_menu][i == menu->selected_item];
 
 		gfx_draw_text(menu_item.name, px, py, 64.0f, c);
+		if (menu_item.subtitle) {
+			gfx_draw_text(menu_item.subtitle, px, py + 15, 20.0f, (struct color){1.0f, 0.5f, 0.5f, 1.0f});
+		}
 
 		py += 75;
 	}
@@ -247,6 +250,7 @@ static struct menu_item commands_menu_item(void *item)
 
 	return (struct menu_item){
 		.name = command->name,
+		.subtitle = command->pid ? "running" : NULL,
 		.callback = on_command,
 		.item = item,
 	};

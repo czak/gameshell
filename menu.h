@@ -2,6 +2,7 @@
 
 struct menu_item {
 	char *name;
+	char *subtitle;
 	void (*callback)(void *item);
 	void *item;
 };
