@@ -24,17 +24,7 @@ static struct command *active_command = NULL;
 struct action {
 	char *name;
 	void (*callback)(void *data);
-	char *param;
 };
-
-static void on_action(void *data)
-{
-	struct action *action = data;
-
-	if (action->callback) {
-		action->callback(action->param);
-	}
-}
 
 static void on_command(void *data)
 {
@@ -235,7 +225,7 @@ static struct menu_item actions_menu_item(void *item)
 
 	return (struct menu_item){
 		.name = action->name,
-		.callback = on_action,
+		.callback = action->callback,
 		.item = item,
 	};
 }
@@ -277,9 +267,9 @@ int main(int argc, char *argv[])
 
 	// Build actions menu
 	actions_menu.resolver = actions_menu_item;
-	menu_append(&actions_menu, &(struct action){"Terminate", on_terminate, NULL});
-	menu_append(&actions_menu, &(struct action){"Stop", on_stop, NULL});
-	menu_append(&actions_menu, &(struct action){"Continue", on_continue, NULL});
+	menu_append(&actions_menu, &(struct action){"Terminate", on_terminate});
+	menu_append(&actions_menu, &(struct action){"Stop", on_stop});
+	menu_append(&actions_menu, &(struct action){"Continue", on_continue});
 
 	enum {
 		WINDOW,
