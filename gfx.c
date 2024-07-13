@@ -5,8 +5,11 @@
 #include "gfx.h"
 #include "font.h"
 #include "image.h"
+
 #include "text_vert_shader.h"
 #include "text_frag_shader.h"
+#include "rect_vert_shader.h"
+#include "rect_frag_shader.h"
 
 extern struct font font;
 static GLuint font_texture;
@@ -22,7 +25,8 @@ struct program {
 	} uniforms;
 };
 
-struct program text_program;
+static struct program text_program;
+static struct program rect_program;
 
 static struct vertex {
 	GLfloat x, y;
@@ -85,6 +89,7 @@ static void program_init(struct program *program, const char *vs_source, const c
 void gfx_init()
 {
 	program_init(&text_program, text_vert_shader_source, text_frag_shader_source);
+	program_init(&rect_program, rect_vert_shader_source, rect_frag_shader_source);
 
 	// Load font texture
 	font_texture = texture_init(GL_RGB, 512, 512, font.atlas);
@@ -152,7 +157,10 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 
 void gfx_draw_rect(int x, int y, int width, int height, struct color c)
 {
-	// glUniform4f(rect_program.uniforms.color, c.r, c.g, c.b, c.a);
+	glUseProgram(rect_program.id);
+
+	glUniform2f(rect_program.uniforms.viewport, dimensions.viewport_width, dimensions.viewport_height);
+	glUniform4f(rect_program.uniforms.color, c.r, c.g, c.b, c.a);
 
 	vertices[0] = (struct vertex){x, y};
 	vertices[1] = (struct vertex){x, y + height};

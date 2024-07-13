@@ -13,7 +13,7 @@
 static int running = 1;
 
 static const int virtual_width = 1920;
-static const int virtual_height = 1080;
+static const int virtual_height = 1200;
 
 static struct menu commands_menu = {};
 static struct menu actions_menu = {};
@@ -86,6 +86,8 @@ static void draw_menu(struct menu *menu, int px, int py)
 static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
+
+	gfx_draw_rect(20, 20, 500, 100, (struct color){0.5f, 0.5f, 0.3f, 0.8f});
 
 	draw_menu(&commands_menu, 50, 100);
 
