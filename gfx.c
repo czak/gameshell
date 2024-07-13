@@ -9,9 +9,20 @@
 #include "text_frag_shader.h"
 
 extern struct font font;
+static GLuint font_texture;
 
-static GLuint program;
-static GLuint texture_font;
+struct program {
+	GLuint id;
+	struct {
+		GLint offset;
+		GLint scale;
+		GLint viewport;
+		GLint color;
+		GLint screenpxrange;
+	} uniforms;
+};
+
+struct program text_program;
 
 static struct vertex {
 	GLfloat x, y;
@@ -19,16 +30,9 @@ static struct vertex {
 } vertices[4];
 
 static struct {
-	GLint offset;
-	GLint scale;
-	GLint viewport;
-	GLint color;
-	GLint screenpxrange;
-} uniforms;
-
-// ratio of device_width / viewport_width
-// may be > 1 for HiDPI
-static float viewport_scale;
+	int device_width, device_height;
+	int viewport_width, viewport_height;
+} dimensions;
 
 static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const void *pixels)
 {
@@ -48,37 +52,42 @@ static GLuint texture_init(GLint format, GLsizei width, GLsizei height, const vo
 	return texture;
 }
 
-void gfx_init()
+static void program_init(struct program *program, const char *vs_source, const char *fs_source)
 {
-	// Build shader program
-	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader, 1, &text_vert_shader_source, NULL);
-	glCompileShader(vertex_shader);
+	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vs, 1, &vs_source, NULL);
+	glCompileShader(vs);
 
-	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader, 1, &text_frag_shader_source, NULL);
-	glCompileShader(fragment_shader);
+	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fs, 1, &fs_source, NULL);
+	glCompileShader(fs);
 
-	program = glCreateProgram();
-	glAttachShader(program, vertex_shader);
-	glAttachShader(program, fragment_shader);
-	glLinkProgram(program);
+	GLuint id = glCreateProgram();
+	glAttachShader(id, vs);
+	glAttachShader(id, fs);
+	glLinkProgram(id);
 
 	int success;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	assert(success);
 
-	uniforms.offset = glGetUniformLocation(program, "u_Offset");
-	uniforms.scale = glGetUniformLocation(program, "u_Scale");
-	uniforms.viewport = glGetUniformLocation(program, "u_Viewport");
-	uniforms.screenpxrange = glGetUniformLocation(program, "u_ScreenPxRange");
+	glDeleteShader(vs);
+	glDeleteShader(fs);
 
-	uniforms.color = glGetUniformLocation(program, "u_Color");
+	program->id = id;
+	program->uniforms.offset = glGetUniformLocation(id, "u_Offset");
+	program->uniforms.scale = glGetUniformLocation(id, "u_Scale");
+	program->uniforms.viewport = glGetUniformLocation(id, "u_Viewport");
+	program->uniforms.screenpxrange = glGetUniformLocation(id, "u_ScreenPxRange");
+	program->uniforms.color = glGetUniformLocation(id, "u_Color");
+}
 
-	glUseProgram(program);
+void gfx_init()
+{
+	program_init(&text_program, text_vert_shader_source, text_frag_shader_source);
 
 	// Load font texture
-	texture_font = texture_init(GL_RGB, 512, 512, font.atlas);
+	font_texture = texture_init(GL_RGB, 512, 512, font.atlas);
 
 	// Prepare to draw quads with texture coords
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
@@ -100,21 +109,27 @@ void gfx_clear(float red, float green, float blue, float alpha)
 void gfx_resize(int device_width, int device_height, int viewport_width, int viewport_height)
 {
 	glViewport(0, 0, device_width, device_height);
-	glUniform2f(uniforms.viewport, viewport_width, viewport_height);
 
-	viewport_scale = (float) device_width / viewport_width;
+	dimensions.device_width = device_width;
+	dimensions.device_height = device_height;
+	dimensions.viewport_width = viewport_width;
+	dimensions.viewport_height = viewport_height;
 }
 
 void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 {
-	glBindTexture(GL_TEXTURE_2D, texture_font);
-	glUniform2f(uniforms.offset, x, y);
-	glUniform1f(uniforms.scale, scale);
-	glUniform4f(uniforms.color, c.r, c.g, c.b, c.a);
+	glUseProgram(text_program.id);
+
+	glBindTexture(GL_TEXTURE_2D, font_texture);
+	glUniform2f(text_program.uniforms.viewport, dimensions.viewport_width, dimensions.viewport_height);
+	glUniform2f(text_program.uniforms.offset, x, y);
+	glUniform1f(text_program.uniforms.scale, scale);
+	glUniform4f(text_program.uniforms.color, c.r, c.g, c.b, c.a);
 
 	// see https://github.com/Chlumsky/msdfgen/blob/master/README.md#using-a-multi-channel-distance-field
+	float viewport_scale = (float) dimensions.device_width / dimensions.viewport_width;
 	float screenpxrange = scale * viewport_scale * font.pxrange / font.size;
-	glUniform1f(uniforms.screenpxrange, screenpxrange >= 1 ? screenpxrange : 1);
+	glUniform1f(text_program.uniforms.screenpxrange, screenpxrange >= 1 ? screenpxrange : 1);
 
 	float px = 0;
 	while (*msg != '\0') {
@@ -133,4 +148,16 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 
 		msg++;
 	}
+}
+
+void gfx_draw_rect(int x, int y, int width, int height, struct color c)
+{
+	// glUniform4f(rect_program.uniforms.color, c.r, c.g, c.b, c.a);
+
+	vertices[0] = (struct vertex){x, y};
+	vertices[1] = (struct vertex){x, y + height};
+	vertices[2] = (struct vertex){x + width, y};
+	vertices[3] = (struct vertex){x + width, y + height};
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
