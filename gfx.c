@@ -5,8 +5,8 @@
 #include "gfx.h"
 #include "font.h"
 #include "image.h"
-#include "vertex_shader.h"
-#include "fragment_shader.h"
+#include "text_vert_shader.h"
+#include "text_frag_shader.h"
 
 extern struct font font;
 
@@ -52,11 +52,11 @@ void gfx_init()
 {
 	// Build shader program
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+	glShaderSource(vertex_shader, 1, &text_vert_shader_source, NULL);
 	glCompileShader(vertex_shader);
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+	glShaderSource(fragment_shader, 1, &text_frag_shader_source, NULL);
 	glCompileShader(fragment_shader);
 
 	program = glCreateProgram();

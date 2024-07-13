@@ -6,6 +6,6 @@ parser = generator(
 )
 
 shaders = parser.process(
-  'fragment.glsl',
-  'vertex.glsl',
+  'text_frag.glsl',
+  'text_vert.glsl',
 )
