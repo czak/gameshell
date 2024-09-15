@@ -13,7 +13,7 @@
 static int running = 1;
 
 static const int virtual_width = 1920;
-static const int virtual_height = 1200;
+static const int virtual_height = 1080;
 
 static struct menu commands_menu = {};
 static struct menu actions_menu = {};
