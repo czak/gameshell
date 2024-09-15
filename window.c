@@ -221,6 +221,6 @@ void window_toggle()
 	} else {
 		window.visible = 1;
 
-		window_redraw();
+		wl_surface_commit(window.wl_surface);
 	}
 }
