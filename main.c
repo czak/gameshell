@@ -87,8 +87,6 @@ static void on_draw()
 {
 	gfx_clear(0.0f, 0.0f, 0.0f, 0.5f);
 
-	gfx_draw_rect(20, 20, 500, 100, (struct color){0.5f, 0.5f, 0.3f, 0.8f});
-
 	draw_menu(&commands_menu, 50, 100);
 
 	if (active_menu == &actions_menu) {
