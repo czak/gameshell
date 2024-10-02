@@ -16,7 +16,7 @@ outerpxpadding = "2"
 dimensions = ["512", "512"]
 
 system(
-  "msdf-atlas-gen",
+  "./msdf-atlas-gen",
   "-font", font_path,
   "-size", size,
   "-type", "msdf",
@@ -32,7 +32,7 @@ system(
 
 # also generate png
 system(
-  "msdf-atlas-gen",
+  "./msdf-atlas-gen",
   "-font", font_path,
   "-size", size,
   "-type", "msdf",
