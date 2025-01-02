@@ -1,10 +1,6 @@
-project('gameshell', 'c')
+project('gameshell', 'c', default_options: ['b_ndebug=if-release'])
 
 add_project_arguments('-D_GNU_SOURCE', language: 'c')
-
-if get_option('buildtype').startswith('debug')
-  add_project_arguments('-D_LOG_ENABLE', language: 'c')
-endif
 
 subdir('shaders')
 
