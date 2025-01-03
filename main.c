@@ -110,6 +110,7 @@ static void on_gamepad()
 static void on_button(int button)
 {
 	LOG("Button: %d", button);
+	LOG("DEBUG: Visible? %d", window_visible());
 
 	// Only MODE is handled regardless if visible/invisible
 	if (button == BTN_MODE) {

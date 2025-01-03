@@ -220,26 +220,34 @@ void gamepad_dispatch()
 
 void gamepad_grab()
 {
+	LOG("grab: ifd=%d, gfd=%d, grabbed=%d", gamepad.ifd, gamepad.gfd, gamepad.grabbed);
+
 	if (gamepad.gfd < 0) return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 1);
 	if (res == 0) {
+		LOG("grab successful");
 		gamepad.grabbed = GAMEPAD_GRABBED;
 	}
 	else if (res < 0) {
+		LOG("grab failed");
 		perror("EVIOCGRAB");
 	}
 }
 
 void gamepad_ungrab()
 {
+	LOG("ungrab: ifd=%d, gfd=%d, grabbed=%d", gamepad.ifd, gamepad.gfd, gamepad.grabbed);
+
 	if (gamepad.gfd < 0) return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 0);
 	if (res == 0) {
+		LOG("ungrab successful");
 		gamepad.grabbed = GAMEPAD_UNGRABBED;
 	}
 	else if (res < 0) {
+		LOG("grab failed");
 		perror("EVIOCGRAB");
 	}
 }
