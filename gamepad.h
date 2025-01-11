@@ -21,9 +21,6 @@
 #define BTN_THUMBL		0x13d
 #define BTN_THUMBR		0x13e
 
-#define GAMEPAD_UNGRABBED	0
-#define GAMEPAD_GRABBED		1
-
 void gamepad_init(void (*on_gamepad)(void), void (*on_button)(int button));
 int gamepad_get_inotify();
 int gamepad_get_fd();

@@ -9,6 +9,7 @@
 
 #include "protocols/wlr-layer-shell-unstable-v1.h"
 
+#include "log.h"
 #include "window.h"
 
 static struct {
@@ -37,6 +38,7 @@ static struct {
 
 	int width, height;
 	int visible;
+	int configured;
 } window;
 
 static const EGLint config_attributes[] = {
@@ -104,6 +106,8 @@ static void zwlr_layer_surface_v1_configure(void *data,
 {
 	zwlr_layer_surface_v1_ack_configure(window.zwlr_layer_surface_v1, serial);
 
+	window.configured = 1;
+
 	if (!window.visible) return;
 
 	if (width > 0) window.width = width;
@@ -117,9 +121,15 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	window_redraw();
 }
 
+static void zwlr_layer_surface_v1_closed(void *data,
+		struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1)
+{
+	LOG("LAYER CLOSED!!!");
+}
+
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {
 	.configure = zwlr_layer_surface_v1_configure,
-	.closed = noop,
+	.closed = zwlr_layer_surface_v1_closed,
 };
 
 void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), void (*on_key)(int key))
@@ -198,7 +208,7 @@ int window_dispatch()
 
 void window_redraw()
 {
-	if (!window.visible) return;
+	if (!window.visible || !window.configured) return;
 
 	if (window.on_draw)
 		window.on_draw();

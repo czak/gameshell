@@ -14,7 +14,6 @@
 static struct {
 	int ifd;
 	int gfd;
-	int grabbed;
 	void (*on_gamepad)(void);
 	void (*on_button)(int button);
 } gamepad;
@@ -114,14 +113,15 @@ static int gamepad_open()
 
 void gamepad_init(void (*on_gamepad)(void), void (*on_button)(int button))
 {
+	gamepad.on_gamepad = on_gamepad;
+	gamepad.on_button = on_button;
+
 	gamepad.ifd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
 	inotify_add_watch(gamepad.ifd, "/dev/input", IN_CREATE | IN_ATTRIB);
 
 	gamepad.gfd = gamepad_open();
-	gamepad_grab();
-
-	gamepad.on_gamepad = on_gamepad;
-	gamepad.on_button = on_button;
+	if (gamepad.gfd > 0 && gamepad.on_gamepad)
+		gamepad.on_gamepad();
 }
 
 int gamepad_get_inotify()
@@ -150,11 +150,11 @@ static void dispatch_ifd()
 
 	if (n > 0) {
 		// A new /dev/input/event* device showed up.
-		// Try to open it and restore grab.
+		// Try to open it if we don't have one open yet.
 		if (gamepad.gfd < 0) {
 			gamepad.gfd = gamepad_open();
-			if (gamepad.grabbed) gamepad_grab();
-			if (gamepad.on_gamepad) gamepad.on_gamepad();
+			if (gamepad.gfd > 0 && gamepad.on_gamepad)
+				gamepad.on_gamepad();
 		}
 	}
 	else if (n < 0 && errno != EWOULDBLOCK) {
@@ -202,8 +202,8 @@ static void dispatch_gfd()
 
 		// Maybe there's another gamepad we can open right away
 		gamepad.gfd = gamepad_open();
-		if (gamepad.grabbed) gamepad_grab();
-		if (gamepad.on_gamepad) gamepad.on_gamepad();
+		if (gamepad.gfd > 0 && gamepad.on_gamepad)
+			gamepad.on_gamepad();
 	}
 }
 
@@ -220,14 +220,13 @@ void gamepad_dispatch()
 
 void gamepad_grab()
 {
-	LOG("grab: ifd=%d, gfd=%d, grabbed=%d", gamepad.ifd, gamepad.gfd, gamepad.grabbed);
+	LOG("grab: gfd=%d", gamepad.gfd);
 
 	if (gamepad.gfd < 0) return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 1);
 	if (res == 0) {
 		LOG("grab successful");
-		gamepad.grabbed = GAMEPAD_GRABBED;
 	}
 	else if (res < 0) {
 		LOG("grab failed");
@@ -237,17 +236,16 @@ void gamepad_grab()
 
 void gamepad_ungrab()
 {
-	LOG("ungrab: ifd=%d, gfd=%d, grabbed=%d", gamepad.ifd, gamepad.gfd, gamepad.grabbed);
+	LOG("ungrab: gfd=%d", gamepad.gfd);
 
 	if (gamepad.gfd < 0) return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 0);
 	if (res == 0) {
 		LOG("ungrab successful");
-		gamepad.grabbed = GAMEPAD_UNGRABBED;
 	}
 	else if (res < 0) {
-		LOG("grab failed");
+		LOG("ungrab failed");
 		perror("EVIOCGRAB");
 	}
 }
