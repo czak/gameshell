@@ -104,21 +104,14 @@ static void on_resize(int width, int height)
 
 static void on_gamepad()
 {
-	LOG("gamepad!");
-
 	if (window_visible()) {
 		gamepad_grab();
-		LOG("redraw");
 		window_redraw();
-		LOG("post redraw");
 	}
 }
 
 static void on_button(int button)
 {
-	LOG("Button: %d", button);
-	LOG("DEBUG: Visible? %d", window_visible());
-
 	// Only MODE is handled regardless if visible/invisible
 	if (button == BTN_MODE) {
 		window_toggle();
@@ -299,17 +292,14 @@ int main(int argc, char *argv[])
 		poll(pollfds, sizeof(pollfds) / sizeof(pollfds[0]), -1);
 
 		if (pollfds[WINDOW].revents) {
-			LOG("=> EV: window");
 			window_dispatch();
 		}
 
 		if (pollfds[GAMEPAD_INOTIFY].revents || pollfds[GAMEPAD_EVENT].revents) {
-			LOG("=> EV: gamepad");
 			gamepad_dispatch();
 		}
 
 		if (pollfds[SIGNALS].revents) {
-			LOG("=> EV: signals");
 			signals_dispatch();
 		}
 	}
