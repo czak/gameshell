@@ -128,11 +128,10 @@ void command_exec(struct command *command)
 		execvp(command->path, command->args);
 
 		// exec only returns if an error occured
-		LOG("Exec in child %d failed", getpid());
-		exit(EXIT_FAILURE);
+		log_fatal("Exec in child %d failed", getpid());
 	}
 	else {
-		LOG("Fork failed");
+		log_error("Fork failed");
 	}
 }
 

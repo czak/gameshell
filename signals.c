@@ -36,6 +36,6 @@ void signals_dispatch()
 			signals.on_child(si.ssi_pid, si.ssi_code);
 	}
 	else if (n < 0 && errno != EWOULDBLOCK) {
-		LOG("Failed to read signalfd");
+		log_error("Failed to read signalfd");
 	}
 }

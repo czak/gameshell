@@ -124,7 +124,7 @@ static void zwlr_layer_surface_v1_configure(void *data,
 static void zwlr_layer_surface_v1_closed(void *data,
 		struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1)
 {
-	LOG("LAYER CLOSED!!!");
+	log_error("Unexpected layer closed");
 }
 
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {

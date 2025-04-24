@@ -181,7 +181,7 @@ static void on_key(int key)
 			break;
 
 		default:
-			LOG("key: %d", key);
+			log_debug("Key: %d", key);
 	}
 }
 
@@ -195,7 +195,8 @@ static void on_child(uint32_t pid, int32_t code)
 	case CLD_EXITED:
 	case CLD_KILLED:
 	case CLD_DUMPED:
-		LOG("Child %d exited (%d)", pid, code);
+		log_debug("Child %d exited (%d)", pid, code);
+
 		waitpid(pid, NULL, 0);
 		command->pid = 0;
 		command->stopped = 0;
@@ -208,12 +209,14 @@ static void on_child(uint32_t pid, int32_t code)
 		break;
 
 	case CLD_STOPPED:
-		LOG("Child %d stopped", pid);
+		log_debug("Child %d stopped", pid);
+
 		command->stopped = 1;
 		break;
 
 	case CLD_CONTINUED:
-		LOG("Child %d continued", pid);
+		log_debug("Child %d continued", pid);
+
 		command->stopped = 0;
 		break;
 	}

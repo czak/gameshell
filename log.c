@@ -1,21 +1,35 @@
 #include <stdarg.h>
 #include <stdio.h>
-#include <time.h>
 
-void log_print(const char *file, int lineno, const char *fmt, ...)
+#include "log.h"
+
+#ifdef NDEBUG
+	static enum log_level min_level = LOG_INFO;
+#else
+	static enum log_level min_level = LOG_DEBUG;
+#endif
+
+void log_print(enum log_level level, const char *fmt, ...)
 {
-	struct timespec ts;
-	clock_gettime(CLOCK_BOOTTIME, &ts);
+	if (level < min_level) return;
 
-	static time_t start_sec = -1;
-	if (start_sec == -1) {
-		start_sec = ts.tv_sec;
+	const char *label = "";
+	switch (level) {
+		case LOG_DEBUG:
+			label = "\033[90m[DBG]\033[0m ";
+			break;
+		case LOG_INFO:
+			label = "\033[34m[INF]\033[0m ";
+			break;
+		case LOG_WARN:
+			label = "\033[33m[WAR]\033[0m  ";
+			break;
+		case LOG_ERROR:
+			label = "\033[91m[ERR]\033[0m ";
+			break;
 	}
 
-	fprintf(stderr, "\033[2m");
-	fprintf(stderr, "[%3ld.%03ld] %s:%d: ", (ts.tv_sec - start_sec) % 1000,
-			ts.tv_nsec / 1000000, file, lineno);
-	fprintf(stderr, "\033[0m");
+	fprintf(stderr, "%s", label);
 
 	va_list ap;
 	va_start(ap, fmt);

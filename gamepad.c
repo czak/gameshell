@@ -100,7 +100,7 @@ static int gamepad_open()
 
 				fd = open(buf, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 				if (fd >= 0) {
-					LOG("Found %s at %s", name, buf);
+					log_info("Found %s at %s", name, buf);
 					break;
 				}
 			}
@@ -158,7 +158,7 @@ static void dispatch_ifd()
 		}
 	}
 	else if (n < 0 && errno != EWOULDBLOCK) {
-		LOG("Failed to read inotify");
+		log_error("Failed to read inotify");
 		return;
 	}
 }
@@ -197,7 +197,7 @@ static void dispatch_gfd()
 		}
 	}
 	else if (n < 0 && errno != EWOULDBLOCK) {
-		LOG("Failed to read gamepad");
+		log_error("Failed to read gamepad");
 		close(gamepad.gfd);
 
 		// Maybe there's another gamepad we can open right away
@@ -220,32 +220,20 @@ void gamepad_dispatch()
 
 void gamepad_grab()
 {
-	LOG("grab: gfd=%d", gamepad.gfd);
-
 	if (gamepad.gfd < 0) return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 1);
-	if (res == 0) {
-		LOG("grab successful");
-	}
-	else if (res < 0) {
-		LOG("grab failed");
-		perror("EVIOCGRAB");
+	if (res < 0) {
+		log_warn("Grab failed: %s", strerror(errno));
 	}
 }
 
 void gamepad_ungrab()
 {
-	LOG("ungrab: gfd=%d", gamepad.gfd);
-
 	if (gamepad.gfd < 0) return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 0);
-	if (res == 0) {
-		LOG("ungrab successful");
-	}
-	else if (res < 0) {
-		LOG("ungrab failed");
-		perror("EVIOCGRAB");
+	if (res < 0) {
+		log_warn("Ungrab failed: %s", strerror(errno));
 	}
 }

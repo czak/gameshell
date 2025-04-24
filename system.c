@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <sys/file.h>
 
+#include "log.h"
+
 /**
  * Ensure only a single instance of the program is running
  */
@@ -19,12 +21,10 @@ void system_set_lockfile()
 
 	int fd = open(lockfile, O_CREAT | O_RDWR, 0666);
 	if (fd == -1) {
-		fprintf(stderr, "Failed to create lockfile %s.\n", lockfile);
-		exit(EXIT_FAILURE);
+		log_fatal("Failed to create lockfile %s", lockfile);
 	}
 
 	if (flock(fd, LOCK_EX | LOCK_NB)) {
-		fprintf(stderr, "Failed to lock %s. Is gameshell running?\n", lockfile);
-		exit(EXIT_FAILURE);
+		log_fatal("Failed to lock %s. Is gameshell running?", lockfile);
 	}
 }
