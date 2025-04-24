@@ -119,18 +119,20 @@ void command_exec(struct command *command)
 
 	if (pid > 0) {
 		command->pid = pid;
-    } else if (pid == 0) {
+	}
+	else if (pid == 0) {
 		setpgid(0, 0);
 		if (command->wdir) {
 			chdir(command->wdir);
 		}
-        execvp(command->path, command->args);
+		execvp(command->path, command->args);
 
 		// exec only returns if an error occured
-        LOG("Exec in child %d failed", getpid());
+		LOG("Exec in child %d failed", getpid());
 		exit(EXIT_FAILURE);
-    } else {
-        LOG("Fork failed");
+	}
+	else {
+		LOG("Fork failed");
 	}
 }
 
