@@ -197,12 +197,12 @@ static void dispatch_gfd()
 		}
 	}
 	else if (n < 0 && errno != EWOULDBLOCK) {
-		log_error("Failed to read gamepad");
+		log_warn("Lost connection to gamepad");
 		close(gamepad.gfd);
 
 		// Maybe there's another gamepad we can open right away
 		gamepad.gfd = gamepad_open();
-		if (gamepad.gfd > 0 && gamepad.on_gamepad)
+		if (gamepad.on_gamepad)
 			gamepad.on_gamepad();
 	}
 }
