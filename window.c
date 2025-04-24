@@ -32,6 +32,7 @@ static struct {
 
 static struct {
 	struct wl_surface *wl_surface;
+	struct wp_viewport *wp_viewport;
 	struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1;
 	struct wl_egl_window *wl_egl_window;
 	EGLSurface egl_surface;
@@ -106,10 +107,12 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	if (width > 0) window.width = width;
 	if (height > 0) window.height = height;
 
-	wl_egl_window_resize(window.wl_egl_window, window.width, window.height, 0, 0);
+	// FIXME: Get target dimensions via fractional scaling manager
+	wl_egl_window_resize(window.wl_egl_window, 3840, 2160, 0, 0);
+	wp_viewport_set_destination(window.wp_viewport, window.width, window.height);
 
 	if (window.on_resize)
-		window.on_resize(window.width, window.height);
+		window.on_resize(3840, 2160);
 
 	// HACK: Additional swap so the EGL surface definitely gets resized.
 	//       - Sway sends 2 configure events so this is redundant
@@ -185,6 +188,8 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 	window.wl_surface = wl_compositor_create_surface(globals.wl_compositor);
 
 	if (!window.wl_surface) log_fatal("Failed to create surface");
+
+	window.wp_viewport = wp_viewporter_get_viewport(globals.wp_viewporter, window.wl_surface);
 
 	window.width = 1920;
 	window.height = 1080;
