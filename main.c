@@ -9,6 +9,7 @@
 #include "gamepad.h"
 #include "menu.h"
 #include "signals.h"
+#include "system.h"
 
 static int running = 1;
 
@@ -250,6 +251,7 @@ static struct menu_item commands_menu_item(void *item)
 
 int main(int argc, char *argv[])
 {
+	system_set_lockfile();
 	commands_load();
 
 	int use_keyboard = argc > 1;

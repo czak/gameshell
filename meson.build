@@ -29,6 +29,7 @@ executable(
   'gamepad.c',
   'menu.c',
   'signals.c',
+  'system.c',
   'fonts/chakra.c',
   shaders,
   dependencies: [
