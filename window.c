@@ -38,23 +38,7 @@ static struct {
 
 	int width, height;
 	int visible;
-	int configured;
 } window;
-
-static const EGLint config_attributes[] = {
-	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-	EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-	EGL_RED_SIZE, 8,
-	EGL_GREEN_SIZE, 8,
-	EGL_BLUE_SIZE, 8,
-	EGL_ALPHA_SIZE, 8,
-	EGL_NONE,
-};
-
-static const EGLint context_attributes[] = {
-	EGL_CONTEXT_MAJOR_VERSION, 2,
-	EGL_NONE
-};
 
 static void noop() {}
 
@@ -106,9 +90,7 @@ static void zwlr_layer_surface_v1_configure(void *data,
 {
 	zwlr_layer_surface_v1_ack_configure(window.zwlr_layer_surface_v1, serial);
 
-	window.configured = 1;
-
-	if (!window.visible) return;
+	window.visible = 1;
 
 	if (width > 0) window.width = width;
 	if (height > 0) window.height = height;
@@ -132,6 +114,44 @@ static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listene
 	.closed = zwlr_layer_surface_v1_closed,
 };
 
+static void egl_init()
+{
+	const EGLint config_attributes[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+		EGL_RED_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_BLUE_SIZE, 8,
+		EGL_ALPHA_SIZE, 8,
+		EGL_NONE,
+	};
+
+	const EGLint context_attributes[] = {
+		EGL_CONTEXT_MAJOR_VERSION, 2,
+		EGL_NONE
+	};
+
+	EGLint num_configs = 0;
+
+	egl.display = eglGetDisplay(globals.wl_display);
+	eglInitialize(egl.display, NULL, NULL);
+	eglChooseConfig(egl.display, config_attributes, &egl.config, 1, &num_configs);
+
+	if (!egl.display) log_fatal("eglGetDisplay failed");
+	if (!egl.config || num_configs != 1) log_fatal("eglChooseConfig failed");
+
+	egl.context = eglCreateContext(egl.display, egl.config, EGL_NO_CONTEXT, context_attributes);
+
+	if (!egl.context) log_fatal("Failed to create EGL rendering context");
+
+	window.wl_egl_window = wl_egl_window_create(window.wl_surface, 200, 200);
+	window.egl_surface = eglCreateWindowSurface(egl.display, egl.config, window.wl_egl_window, NULL);
+
+	if (!window.egl_surface) log_fatal("Failed to create EGL rendering surface");
+
+	eglMakeCurrent(egl.display, window.egl_surface, window.egl_surface, egl.context);
+}
+
 void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), void (*on_key)(int key))
 {
 	globals.wl_display = wl_display_connect(NULL);
@@ -139,56 +159,57 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 	wl_registry_add_listener(globals.wl_registry, &wl_registry_listener, NULL);
 	wl_display_roundtrip(globals.wl_display);
 
-	assert(globals.wl_compositor && globals.wl_seat && globals.zwlr_layer_shell_v1);
+	if (!globals.wl_compositor) log_fatal("Failed to bind wl_compositor");
+	if (!globals.wl_seat) log_fatal("Failed to bind wl_seat");
+	if (!globals.zwlr_layer_shell_v1) log_fatal("Failed to bind zwlr_layer_shell_v1");
 
 	window.wl_surface = wl_compositor_create_surface(globals.wl_compositor);
-	window.zwlr_layer_surface_v1 = zwlr_layer_shell_v1_get_layer_surface(
-			globals.zwlr_layer_shell_v1, window.wl_surface, NULL,
-			ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY, "gameshell");
 
-	assert(window.wl_surface && window.zwlr_layer_surface_v1);
-
-	egl.display = eglGetDisplay(globals.wl_display);
-	eglInitialize(egl.display, NULL, NULL);
-
-	EGLint num_configs = 0;
-	eglChooseConfig(egl.display, config_attributes, &egl.config, 1, &num_configs);
-
-	assert(egl.display && egl.config && num_configs == 1);
-
-	egl.context = eglCreateContext(egl.display, egl.config, EGL_NO_CONTEXT, context_attributes);
-
-	assert(egl.context);
-
-	window.wl_egl_window = wl_egl_window_create(window.wl_surface, 200, 200);
-	window.egl_surface = eglCreateWindowSurface(egl.display, egl.config, window.wl_egl_window, NULL);
-	eglMakeCurrent(egl.display, window.egl_surface, window.egl_surface, egl.context);
-
-	assert(window.wl_egl_window && window.egl_surface);
-
-	zwlr_layer_surface_v1_add_listener(window.zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
-	zwlr_layer_surface_v1_set_anchor(window.zwlr_layer_surface_v1,
-			ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM +
-			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
-	zwlr_layer_surface_v1_set_exclusive_zone(window.zwlr_layer_surface_v1, -1);
-	wl_surface_commit(window.wl_surface);
-
-	if (on_key) {
-		zwlr_layer_surface_v1_set_keyboard_interactivity(
-				window.zwlr_layer_surface_v1,
-				ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
-		wl_surface_commit(window.wl_surface);
-
-		struct wl_keyboard *wl_keyboard = wl_seat_get_keyboard(globals.wl_seat);
-		wl_keyboard_add_listener(wl_keyboard, &wl_keyboard_listener, NULL);
-	}
+	if (!window.wl_surface) log_fatal("Failed to create surface");
 
 	window.width = 1920;
 	window.height = 1080;
 	window.on_draw = on_draw;
 	window.on_resize = on_resize;
 	window.on_key = on_key;
-	window.visible = 1;
+
+	egl_init();
+	window_show();
+}
+
+void window_show()
+{
+	window.zwlr_layer_surface_v1 = zwlr_layer_shell_v1_get_layer_surface(
+			globals.zwlr_layer_shell_v1, window.wl_surface, NULL,
+			ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY, "gameshell");
+
+	if (!window.zwlr_layer_surface_v1) log_fatal("Failed to create layer surface");
+
+	zwlr_layer_surface_v1_add_listener(window.zwlr_layer_surface_v1, &zwlr_layer_surface_v1_listener, NULL);
+	zwlr_layer_surface_v1_set_anchor(window.zwlr_layer_surface_v1,
+			ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP + ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM +
+			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT + ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+	zwlr_layer_surface_v1_set_exclusive_zone(window.zwlr_layer_surface_v1, -1);
+
+	if (window.on_key) {
+		zwlr_layer_surface_v1_set_keyboard_interactivity(
+				window.zwlr_layer_surface_v1,
+				ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE);
+
+		struct wl_keyboard *wl_keyboard = wl_seat_get_keyboard(globals.wl_seat);
+		wl_keyboard_add_listener(wl_keyboard, &wl_keyboard_listener, NULL);
+	}
+
+	wl_surface_commit(window.wl_surface);
+}
+
+void window_hide()
+{
+	zwlr_layer_surface_v1_destroy(window.zwlr_layer_surface_v1);
+	wl_surface_attach(window.wl_surface, NULL, 0, 0);
+	wl_surface_commit(window.wl_surface);
+
+	window.visible = 0;
 }
 
 int window_get_fd()
@@ -208,7 +229,7 @@ int window_dispatch()
 
 void window_redraw()
 {
-	if (!window.visible || !window.configured) return;
+	if (!window.visible) return;
 
 	if (window.on_draw)
 		window.on_draw();
@@ -219,18 +240,4 @@ void window_redraw()
 int window_visible()
 {
 	return window.visible;
-}
-
-void window_toggle()
-{
-	if (window.visible) {
-		window.visible = 0;
-
-		wl_surface_attach(window.wl_surface, NULL, 0, 0);
-		wl_surface_commit(window.wl_surface);
-	} else {
-		window.visible = 1;
-
-		wl_surface_commit(window.wl_surface);
-	}
 }

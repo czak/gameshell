@@ -115,11 +115,14 @@ static void on_button(int button)
 {
 	// Only MODE is handled regardless if visible/invisible
 	if (button == BTN_MODE) {
-		window_toggle();
-		if (window_visible())
-			gamepad_grab();
-		else
+		if (window_visible()) {
+			window_hide();
 			gamepad_ungrab();
+		}
+		else {
+			window_show();
+			gamepad_grab();
+		}
 		return;
 	}
 

@@ -6,4 +6,5 @@ void window_flush();
 int window_dispatch();
 void window_redraw();
 int window_visible();
-void window_toggle();
+void window_show();
+void window_hide();
