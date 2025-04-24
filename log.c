@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "log.h"
 
@@ -22,9 +23,10 @@ void log_print(enum log_level level, const char *fmt, ...)
 			label = "\033[34m[INF]\033[0m ";
 			break;
 		case LOG_WARN:
-			label = "\033[33m[WAR]\033[0m  ";
+			label = "\033[33m[WAR]\033[0m ";
 			break;
 		case LOG_ERROR:
+		case LOG_FATAL:
 			label = "\033[91m[ERR]\033[0m ";
 			break;
 	}
@@ -37,4 +39,6 @@ void log_print(enum log_level level, const char *fmt, ...)
 	va_end(ap);
 
 	fprintf(stderr, "\n");
+
+	if (level == LOG_FATAL) exit(EXIT_FAILURE);
 }
