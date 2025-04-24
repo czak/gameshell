@@ -8,6 +8,8 @@ protocols = declare_dependency(
   sources: [
     'protocols/xdg-shell.c',
     'protocols/wlr-layer-shell-unstable-v1.c',
+    'protocols/fractional-scale-v1.c',
+    'protocols/viewporter.c',
   ],
   include_directories: ['protocols'],
 )

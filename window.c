@@ -8,6 +8,8 @@
 #include <GLES2/gl2.h>
 
 #include "protocols/wlr-layer-shell-unstable-v1.h"
+#include "protocols/fractional-scale-v1.h"
+#include "protocols/viewporter.h"
 
 #include "log.h"
 #include "window.h"
@@ -18,6 +20,8 @@ static struct {
 	struct wl_compositor *wl_compositor;
 	struct wl_seat *wl_seat;
 	struct zwlr_layer_shell_v1 *zwlr_layer_shell_v1;
+	struct wp_fractional_scale_manager_v1 *wp_fractional_scale_manager_v1;
+	struct wp_viewporter *wp_viewporter;
 } globals;
 
 static struct {
@@ -50,13 +54,20 @@ static void wl_registry_global(void *data, struct wl_registry *wl_registry,
 		globals.wl_compositor = wl_registry_bind(wl_registry, name, &wl_compositor_interface, 4);
 	}
 
-
 	else if (strcmp(interface, wl_seat_interface.name) == 0) {
 		globals.wl_seat = wl_registry_bind(wl_registry, name, &wl_seat_interface, 7);
 	}
 
 	else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
 		globals.zwlr_layer_shell_v1 = wl_registry_bind(wl_registry, name, &zwlr_layer_shell_v1_interface, 4);
+	}
+
+	else if (strcmp(interface, wp_fractional_scale_manager_v1_interface.name) == 0) {
+		globals.wp_fractional_scale_manager_v1 = wl_registry_bind(wl_registry, name, &wp_fractional_scale_manager_v1_interface, 1);
+	}
+
+	else if (strcmp(interface, wp_viewporter_interface.name) == 0) {
+		globals.wp_viewporter = wl_registry_bind(wl_registry, name, &wp_viewporter_interface, 1);
 	}
 	// clang-format on
 }
@@ -168,6 +179,8 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 	if (!globals.wl_compositor) log_fatal("Failed to bind wl_compositor");
 	if (!globals.wl_seat) log_fatal("Failed to bind wl_seat");
 	if (!globals.zwlr_layer_shell_v1) log_fatal("Failed to bind zwlr_layer_shell_v1");
+	if (!globals.wp_fractional_scale_manager_v1) log_fatal("Failed to bind wp_fractional_scale_manager_v1");
+	if (!globals.wp_viewporter) log_fatal("Failed to bind wp_viewporter");
 
 	window.wl_surface = wl_compositor_create_surface(globals.wl_compositor);
 
