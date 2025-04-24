@@ -120,8 +120,8 @@ void gamepad_init(void (*on_gamepad)(void), void (*on_button)(int button))
 	inotify_add_watch(gamepad.ifd, "/dev/input", IN_CREATE | IN_ATTRIB);
 
 	gamepad.gfd = gamepad_open();
-	if (gamepad.gfd > 0 && gamepad.on_gamepad)
-		gamepad.on_gamepad();
+	if (gamepad.gfd > 0)
+		gamepad_grab();
 }
 
 int gamepad_get_inotify()
