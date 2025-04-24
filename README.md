@@ -70,8 +70,8 @@ Controls:
 * <kbd>MODE</kbd> ("Xbox" or "Playstation" button) - toggle UI on/off
 * <kbd>SELECT</kbd> ("SHARE" on Dualshock) - quit gameshell
 * <kbd>DPAD_UP</kbd> / <kbd>DPAD_DOWN</kbd> - navigate menus up/down
-* <kbd>SOUTH</kbd> ("B" on Xbox, "Cross" on Dualshock) - select menu item
-* <kbd>EAST</kbd> ("X" on Xbox, "Square" on Dualshock) - return to top menu
+* <kbd>SOUTH</kbd> ("A" on Xbox, "Cross" on Dualshock) - select menu item
+* <kbd>EAST</kbd> ("B" on Xbox, "Circle" on Dualshock) - return to top menu
 
 ## How it works
 
