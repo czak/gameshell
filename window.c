@@ -33,6 +33,7 @@ static struct {
 static struct {
 	struct wl_surface *wl_surface;
 	struct wp_viewport *wp_viewport;
+	struct wp_fractional_scale_v1 *wp_fractional_scale_v1;
 	struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1;
 	struct wl_egl_window *wl_egl_window;
 	EGLSurface egl_surface;
@@ -111,6 +112,8 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	wl_egl_window_resize(window.wl_egl_window, 3840, 2160, 0, 0);
 	wp_viewport_set_destination(window.wp_viewport, window.width, window.height);
 
+	log_debug("Configure: %d x %d", width, height);
+
 	if (window.on_resize)
 		window.on_resize(3840, 2160);
 
@@ -132,6 +135,18 @@ static void zwlr_layer_surface_v1_closed(void *data,
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {
 	.configure = zwlr_layer_surface_v1_configure,
 	.closed = zwlr_layer_surface_v1_closed,
+};
+
+
+static void wp_fractional_scale_v1_preferred_scale(void *data,
+				struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
+				uint32_t scale)
+{
+	log_debug("Fractional scale: %d", scale);
+}
+
+static const struct wp_fractional_scale_v1_listener wp_fractional_scale_v1_listener = {
+	.preferred_scale = wp_fractional_scale_v1_preferred_scale,
 };
 
 static void egl_init()
@@ -190,6 +205,9 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height), vo
 	if (!window.wl_surface) log_fatal("Failed to create surface");
 
 	window.wp_viewport = wp_viewporter_get_viewport(globals.wp_viewporter, window.wl_surface);
+
+	window.wp_fractional_scale_v1 = wp_fractional_scale_manager_v1_get_fractional_scale(globals.wp_fractional_scale_manager_v1, window.wl_surface);
+	wp_fractional_scale_v1_add_listener(window.wp_fractional_scale_v1, &wp_fractional_scale_v1_listener, NULL);
 
 	window.width = 1920;
 	window.height = 1080;
