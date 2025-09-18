@@ -1,4 +1,4 @@
-#include "font.h"
+#include "../font.h"
 
 // mkfont.rb /home/czak/.local/share/fonts/ChakraPetch-SemiBold.ttf chakra
 struct font font = {

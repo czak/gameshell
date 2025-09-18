@@ -73,7 +73,7 @@ texture = pixels.each_slice(16).map do |line|
 end
 
 File.write("#{name}.c", <<~OUT)
-#include "font.h"
+#include "../font.h"
 
 // mkfont.rb #{font_path} #{name}
 struct font font = {

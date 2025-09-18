@@ -39,18 +39,18 @@ static void on_command(void *data)
 	window_redraw();
 }
 
-static void on_terminate()
+static void on_terminate(void *data)
 {
 	kill(active_command->pid, SIGCONT);
 	kill(active_command->pid, SIGTERM);
 }
 
-static void on_stop()
+static void on_stop(void *data)
 {
 	kill(-active_command->pid, SIGSTOP);
 }
 
-static void on_continue()
+static void on_continue(void *data)
 {
 	kill(-active_command->pid, SIGCONT);
 }

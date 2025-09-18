@@ -1,4 +1,4 @@
-#include "font.h"
+#include "../font.h"
 
 // mkfont.rb /usr/share/fonts/TTF/JetBrainsMono-SemiBold.ttf jetbrains
 struct font font = {

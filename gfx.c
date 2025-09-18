@@ -6,10 +6,10 @@
 #include "font.h"
 #include "image.h"
 
-#include "text_vert_shader.h"
-#include "text_frag_shader.h"
-#include "rect_vert_shader.h"
-#include "rect_frag_shader.h"
+#include "shaders/text_vert.h"
+#include "shaders/text_frag.h"
+#include "shaders/rect_vert.h"
+#include "shaders/rect_frag.h"
 
 extern struct font font;
 static GLuint font_texture;
