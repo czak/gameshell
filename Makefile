@@ -1,6 +1,4 @@
-CC = gcc
-CFLAGS = -D_GNU_SOURCE $(shell pkg-config --cflags wayland-client wayland-egl egl glesv2)
-LDFLAGS = -lm $(shell pkg-config --libs wayland-client wayland-egl egl glesv2)
+LDLIBS = $(shell pkg-config --libs wayland-client wayland-egl egl glesv2)
 
 SOURCES = gameshell.c \
 					commands.c \

@@ -38,9 +38,7 @@ To run, you need a Wayland compositor supporting the [wlr layer shell](https://w
 ## How to build
 
 ```sh
-meson setup build
-meson compile -C build
-./build/gameshell
+make
 ```
 
 ## How to use

@@ -1,5 +1,6 @@
 #include <poll.h>
 #include <signal.h>
+#include <stddef.h>
 #include <sys/wait.h>
 
 #include "window.h"
