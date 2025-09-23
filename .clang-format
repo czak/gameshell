@@ -5,15 +5,16 @@ IndentWidth: 4
 IndentCaseLabels: true
 ContinuationIndentWidth: 8
 BracedInitializerIndentWidth: 4
-ColumnLimit: 80
+ColumnLimit: 100
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterFunction: true
   BeforeElse: true
 AlignAfterOpenBracket: DontAlign
 AllowAllArgumentsOnNextLine: false
-AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: Empty
+SortIncludes: false
 
 # Avoid breaking immediately after '=' if possible
 PenaltyBreakAssignment: 21
