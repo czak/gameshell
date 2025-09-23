@@ -38,6 +38,7 @@ static struct {
 	void (*on_draw)();
 	void (*on_resize)(int width, int height);
 	void (*on_key)(int key);
+	void (*on_close)();
 
 	int width, height;
 	int visible;
@@ -158,7 +159,12 @@ static void zwlr_layer_surface_v1_configure(void *data,
 static void zwlr_layer_surface_v1_closed(void *data,
 		struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1)
 {
-	log_error("Unexpected layer closed");
+	log_debug("Layer surface closed, hiding");
+
+	window_hide();
+
+	if (window.on_close)
+		window.on_close();
 }
 
 static const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_v1_listener = {
@@ -213,7 +219,7 @@ static void egl_init()
 }
 
 void window_init(void (*on_draw)(), void (*on_resize)(int width, int height),
-		void (*on_key)(int key))
+		void (*on_key)(int key), void (*on_close)())
 {
 	globals.wl_display = wl_display_connect(NULL);
 	globals.wl_registry = wl_display_get_registry(globals.wl_display);
@@ -241,6 +247,7 @@ void window_init(void (*on_draw)(), void (*on_resize)(int width, int height),
 	window.on_draw = on_draw;
 	window.on_resize = on_resize;
 	window.on_key = on_key;
+	window.on_close = on_close;
 
 	egl_init();
 	window_show();
