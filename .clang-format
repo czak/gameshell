@@ -1,5 +1,5 @@
 ---
-UseTab: Always
+UseTab: AlignWithSpaces
 TabWidth: 4
 IndentWidth: 4
 IndentCaseLabels: true
@@ -10,6 +10,9 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   AfterFunction: true
   BeforeElse: true
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
 AlignAfterOpenBracket: DontAlign
 AllowAllArgumentsOnNextLine: false
 AllowShortIfStatementsOnASingleLine: Never

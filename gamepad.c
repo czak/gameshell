@@ -25,7 +25,8 @@ static struct {
 static int parse_handlers(char *line)
 {
 	char *event = strstr(line, "event");
-	if (!event) return -1;
+	if (!event)
+		return -1;
 
 	int n = -1;
 	sscanf(event, "event%d", &n);
@@ -49,13 +50,16 @@ static int parse_digit(char c)
 static void parse_name(char *dst, char *src, int size)
 {
 	char *start = strchr(src, '"');
-	if (!start) return;
+	if (!start)
+		return;
 
 	char *end = strrchr(src, '"');
-	if (!end) return;
+	if (!end)
+		return;
 
 	size_t len = end - start - 1;
-	if (len > size - 1) len = size - 1;
+	if (len > size - 1)
+		len = size - 1;
 
 	strncpy(dst, start + 1, len);
 	dst[len] = '\0';
@@ -73,11 +77,13 @@ static int is_gamepad(char *line)
 
 	// Which word contains the BTN_GAMEPAD bit
 	int w = num_words - BTN_GAMEPAD / 64 - 1;
-	if (w < 0) return 0;
+	if (w < 0)
+		return 0;
 
 	// Which nibble in the word contains the BTN_GAMEPAD bit
 	int n = strnlen(words[w], 16) - (BTN_GAMEPAD % 64) / 4 - 1;
-	if (n < 0) return 0;
+	if (n < 0)
+		return 0;
 
 	return parse_digit(words[w][n]) & (1 << (BTN_GAMEPAD % 4));
 }
@@ -92,9 +98,11 @@ static int gamepad_open()
 		if (strstr(buf, "N: Name=")) {
 			id = -1;
 			parse_name(name, buf, sizeof(name));
-		} else if (strstr(buf, "H: Handlers=")) {
+		}
+		else if (strstr(buf, "H: Handlers=")) {
 			id = parse_handlers(buf);
-		} else if (id != -1 && strstr(buf, "B: KEY=")) {
+		}
+		else if (id != -1 && strstr(buf, "B: KEY=")) {
 			if (is_gamepad(buf)) {
 				snprintf(buf, sizeof(buf), "/dev/input/event%d", id);
 
@@ -138,7 +146,8 @@ char *gamepad_get_name()
 {
 	if (gamepad.gfd > 0) {
 		return "connected";
-	} else {
+	}
+	else {
 		return "not connected";
 	}
 }
@@ -165,18 +174,23 @@ static void dispatch_ifd()
 
 int translate_event(struct input_event *ev)
 {
-	if (ev->type == EV_KEY && ev->value == 1) return ev->code;
+	if (ev->type == EV_KEY && ev->value == 1)
+		return ev->code;
 
 	// Translate "analog" dpad to digital
 	// See https://www.kernel.org/doc/html/latest/input/gamepad.html
 	if (ev->type == EV_ABS && ev->value != 0) {
 		if (ev->code == ABS_HAT0X) {
-			if (ev->value == -1) return BTN_DPAD_LEFT;
-			if (ev->value == 1) return BTN_DPAD_RIGHT;
+			if (ev->value == -1)
+				return BTN_DPAD_LEFT;
+			if (ev->value == 1)
+				return BTN_DPAD_RIGHT;
 		}
 		else if (ev->code == ABS_HAT0Y) {
-			if (ev->value == -1) return BTN_DPAD_UP;
-			if (ev->value == 1) return BTN_DPAD_DOWN;
+			if (ev->value == -1)
+				return BTN_DPAD_UP;
+			if (ev->value == 1)
+				return BTN_DPAD_DOWN;
 		}
 	}
 
@@ -220,7 +234,8 @@ void gamepad_dispatch()
 
 void gamepad_grab()
 {
-	if (gamepad.gfd < 0) return;
+	if (gamepad.gfd < 0)
+		return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 1);
 	if (res < 0) {
@@ -230,7 +245,8 @@ void gamepad_grab()
 
 void gamepad_ungrab()
 {
-	if (gamepad.gfd < 0) return;
+	if (gamepad.gfd < 0)
+		return;
 
 	int res = ioctl(gamepad.gfd, EVIOCGRAB, 0);
 	if (res < 0) {

@@ -5,14 +5,15 @@
 #include "log.h"
 
 #ifdef NDEBUG
-	static enum log_level min_level = LOG_INFO;
+static enum log_level min_level = LOG_INFO;
 #else
-	static enum log_level min_level = LOG_DEBUG;
+static enum log_level min_level = LOG_DEBUG;
 #endif
 
 void log_print(enum log_level level, const char *fmt, ...)
 {
-	if (level < min_level) return;
+	if (level < min_level)
+		return;
 
 	const char *label = "";
 	switch (level) {
@@ -40,5 +41,6 @@ void log_print(enum log_level level, const char *fmt, ...)
 
 	fprintf(stderr, "\n");
 
-	if (level == LOG_FATAL) exit(EXIT_FAILURE);
+	if (level == LOG_FATAL)
+		exit(EXIT_FAILURE);
 }

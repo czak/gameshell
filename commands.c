@@ -14,15 +14,16 @@ struct command *commands = NULL;
 int commands_count = 0;
 int commands_capacity = 0;
 
-static char *read_line(FILE *f) {
+static char *read_line(FILE *f)
+{
 	char *line = NULL; // NOTE: getline will always allocate a new buffer and we keep it
 	size_t n;
 	ssize_t res = getline(&line, &n, f);
 	if (res == -1) {
 		return NULL;
 	}
-	if (line[res-1] == '\n') {
-		line[res-1] = '\0';
+	if (line[res - 1] == '\n') {
+		line[res - 1] = '\0';
 	}
 	return line;
 }
@@ -105,7 +106,8 @@ void commands_load()
 
 	while (1) {
 		char *line = read_line(f);
-		if (!line) break;
+		if (!line)
+			break;
 
 		append(parse(line));
 	}
@@ -135,7 +137,8 @@ void command_exec(struct command *command)
 	}
 }
 
-struct command *command_find(pid_t pid) {
+struct command *command_find(pid_t pid)
+{
 	for (int i = 0; i < commands_count; i++) {
 		if (commands[i].pid == pid) {
 			return &commands[i];

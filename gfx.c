@@ -95,8 +95,9 @@ void gfx_init()
 	font_texture = texture_init(GL_RGB, 512, 512, font.atlas);
 
 	// Prepare to draw quads with texture coords
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *) vertices + 2 * sizeof(GLfloat));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex), (void *)vertices);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct vertex),
+			(void *)vertices + 2 * sizeof(GLfloat));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -126,13 +127,15 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 	glUseProgram(text_program.id);
 
 	glBindTexture(GL_TEXTURE_2D, font_texture);
-	glUniform2f(text_program.uniforms.viewport, dimensions.viewport_width, dimensions.viewport_height);
+	glUniform2f(text_program.uniforms.viewport, dimensions.viewport_width,
+			dimensions.viewport_height);
 	glUniform2f(text_program.uniforms.offset, x, y);
 	glUniform1f(text_program.uniforms.scale, scale);
 	glUniform4f(text_program.uniforms.color, c.r, c.g, c.b, c.a);
 
-	// see https://github.com/Chlumsky/msdfgen/blob/master/README.md#using-a-multi-channel-distance-field
-	float viewport_scale = (float) dimensions.device_width / dimensions.viewport_width;
+	// see
+	// https://github.com/Chlumsky/msdfgen/blob/master/README.md#using-a-multi-channel-distance-field
+	float viewport_scale = (float)dimensions.device_width / dimensions.viewport_width;
 	float screenpxrange = scale * viewport_scale * font.pxrange / font.size;
 	glUniform1f(text_program.uniforms.screenpxrange, screenpxrange >= 1 ? screenpxrange : 1);
 
@@ -142,10 +145,10 @@ void gfx_draw_text(const char *msg, int x, int y, float scale, struct color c)
 
 		struct glyph *g = &font.glyphs[index];
 
-		vertices[0] = (struct vertex){ px + g->pl, g->pt, g->tl, g->tt };
-		vertices[1] = (struct vertex){ px + g->pl, g->pb, g->tl, g->tb };
-		vertices[2] = (struct vertex){ px + g->pr, g->pt, g->tr, g->tt };
-		vertices[3] = (struct vertex){ px + g->pr, g->pb, g->tr, g->tb };
+		vertices[0] = (struct vertex){px + g->pl, g->pt, g->tl, g->tt};
+		vertices[1] = (struct vertex){px + g->pl, g->pb, g->tl, g->tb};
+		vertices[2] = (struct vertex){px + g->pr, g->pt, g->tr, g->tt};
+		vertices[3] = (struct vertex){px + g->pr, g->pb, g->tr, g->tb};
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -159,7 +162,8 @@ void gfx_draw_rect(int x, int y, int width, int height, struct color c)
 {
 	glUseProgram(rect_program.id);
 
-	glUniform2f(rect_program.uniforms.viewport, dimensions.viewport_width, dimensions.viewport_height);
+	glUniform2f(rect_program.uniforms.viewport, dimensions.viewport_width,
+			dimensions.viewport_height);
 	glUniform4f(rect_program.uniforms.color, c.r, c.g, c.b, c.a);
 
 	vertices[0] = (struct vertex){x, y};

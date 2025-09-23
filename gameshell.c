@@ -128,7 +128,8 @@ static void on_button(int button)
 	}
 
 	// All other inputs need window to be visible
-	if (!window_visible()) return;
+	if (!window_visible())
+		return;
 
 	switch (button) {
 		case BTN_SELECT:
@@ -193,36 +194,37 @@ static void on_child(uint32_t pid, int32_t code)
 {
 	struct command *command = command_find(pid);
 
-	if (command == NULL) return;
+	if (command == NULL)
+		return;
 
 	switch (code) {
-	case CLD_EXITED:
-	case CLD_KILLED:
-	case CLD_DUMPED:
-		log_debug("Child %d exited (%d)", pid, code);
+		case CLD_EXITED:
+		case CLD_KILLED:
+		case CLD_DUMPED:
+			log_debug("Child %d exited (%d)", pid, code);
 
-		waitpid(pid, NULL, 0);
-		command->pid = 0;
-		command->stopped = 0;
+			waitpid(pid, NULL, 0);
+			command->pid = 0;
+			command->stopped = 0;
 
-		if (command == active_command) {
-			active_menu = &commands_menu;
-			active_command = NULL;
-		}
+			if (command == active_command) {
+				active_menu = &commands_menu;
+				active_command = NULL;
+			}
 
-		break;
+			break;
 
-	case CLD_STOPPED:
-		log_debug("Child %d stopped", pid);
+		case CLD_STOPPED:
+			log_debug("Child %d stopped", pid);
 
-		command->stopped = 1;
-		break;
+			command->stopped = 1;
+			break;
 
-	case CLD_CONTINUED:
-		log_debug("Child %d continued", pid);
+		case CLD_CONTINUED:
+			log_debug("Child %d continued", pid);
 
-		command->stopped = 0;
-		break;
+			command->stopped = 0;
+			break;
 	}
 
 	window_redraw();
@@ -245,7 +247,7 @@ static struct menu_item commands_menu_item(void *item)
 
 	char *subtitle = NULL;
 	if (command->pid) {
-		subtitle = command->stopped ? "stopped": "running";
+		subtitle = command->stopped ? "stopped" : "running";
 	}
 
 	return (struct menu_item){
@@ -292,10 +294,10 @@ int main(int argc, char *argv[])
 		window_flush();
 
 		struct pollfd pollfds[] = {
-			[WINDOW] = { .fd = window_get_fd(), .events = POLLIN },
-			[GAMEPAD_INOTIFY] = { .fd = gamepad_get_inotify(), .events = POLLIN },
-			[GAMEPAD_EVENT] = { .fd = gamepad_get_fd(), .events = POLLIN },
-			[SIGNALS] = { .fd = signals_get_fd(), .events = POLLIN },
+			[WINDOW] = {.fd = window_get_fd(), .events = POLLIN},
+			[GAMEPAD_INOTIFY] = {.fd = gamepad_get_inotify(), .events = POLLIN},
+			[GAMEPAD_EVENT] = {.fd = gamepad_get_fd(), .events = POLLIN},
+			[SIGNALS] = {.fd = signals_get_fd(), .events = POLLIN},
 		};
 
 		poll(pollfds, sizeof(pollfds) / sizeof(pollfds[0]), -1);
