@@ -147,12 +147,6 @@ static void zwlr_layer_surface_v1_configure(void *data,
 	if (window.on_resize)
 		window.on_resize(window.width, window.height);
 
-	// HACK: Additional swap so the EGL surface definitely gets resized.
-	//       - Sway sends 2 configure events so this is redundant
-	//       - But Hyprland & KWin send only 1 and first frame may swap old size
-	//         surface
-	eglSwapBuffers(egl.display, window.egl_surface);
-
 	window_redraw();
 }
 
@@ -208,7 +202,7 @@ static void egl_init()
 	if (!egl.context)
 		log_fatal("Failed to create EGL rendering context");
 
-	window.wl_egl_window = wl_egl_window_create(window.wl_surface, 200, 200);
+	window.wl_egl_window = wl_egl_window_create(window.wl_surface, window.width, window.height);
 	window.egl_surface = eglCreateWindowSurface(egl.display, egl.config, window.wl_egl_window,
 			NULL);
 
